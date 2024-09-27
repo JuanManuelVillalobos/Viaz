@@ -1,0 +1,310 @@
+package com.example.viaz.shipment;
+
+
+import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity(name = "shipment")
+public class Shipment {
+    @Id
+    @SequenceGenerator(
+            name = "_sequence",
+            sequenceName = "_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "_sequence"
+    )
+    private Long viazId;
+    private String serviceType;
+    private String customerService;
+    private String client;
+    private String origin;
+    private String customsAgent;
+    private String destination;
+    private String status;
+    private String container;
+    private String cNTRType;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime cNTRDate;
+
+    private String transport;
+    private String operator;
+    private String terminal;
+    private Boolean cI;
+    private Boolean cCP;
+    private Boolean taxFolio;
+    private Boolean loadManoeuvre;
+    private Boolean pISVinculation;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate portDepartureDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime portArrivalDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime portUnloadDate;
+
+    private String vacumManoeuvre;
+    private String POD;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    LocalDate PODDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    LocalDate vacumArrival;
+    private String EIR;
+    private String observations;
+
+    public Shipment(String serviceType, String customerService, String client, String origin, String customsAgent, String destination, String status, String container, String cNTRType, String cNTRDate, String transport, String operator, String terminal, Boolean cI, Boolean cCP, Boolean taxFolio, Boolean loadManoeuvre, Boolean pISVinculation, LocalDate portDepartureDate, LocalDateTime portArrivalDate, LocalDateTime portUnloadDate, String vacumManoeuvre, String POD, LocalDate PODDate, LocalDate vacumArrival, String EIR, String observations) {
+        this.serviceType = serviceType;
+        this.customerService = customerService;
+        this.client = client;
+        this.origin = origin;
+        this.customsAgent = customsAgent;
+        this.destination = destination;
+        this.status = status;
+        this.container = container;
+        this.cNTRType = cNTRType;
+        this.cNTRDate = cNTRDate;
+        this.transport = transport;
+        this.operator = operator;
+        this.terminal = terminal;
+        this.cI = cI;
+        this.cCP = cCP;
+        this.taxFolio = taxFolio;
+        this.loadManoeuvre = loadManoeuvre;
+        this.pISVinculation = pISVinculation;
+        this.portDepartureDate = portDepartureDate;
+        this.portArrivalDate = portArrivalDate;
+        this.portUnloadDate = portUnloadDate;
+        this.vacumManoeuvre = vacumManoeuvre;
+        this.POD = POD;
+        this.PODDate = PODDate;
+        this.vacumArrival = vacumArrival;
+        this.EIR = EIR;
+        this.observations = observations;
+    }
+
+    public Long getViazId() {
+        return viazId;
+    }
+
+    public void setViazId(Long viazId) {
+        this.viazId = viazId;
+    }
+
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public String getCustomerService() {
+        return customerService;
+    }
+
+    public void setCustomerService(String customerService) {
+        this.customerService = customerService;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public String getCustomsAgent() {
+        return customsAgent;
+    }
+
+    public void setCustomsAgent(String customsAgent) {
+        this.customsAgent = customsAgent;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getContainer() {
+        return container;
+    }
+
+    public void setContainer(String container) {
+        this.container = container;
+    }
+
+    public String getcNTRType() {
+        return cNTRType;
+    }
+
+    public void setcNTRType(String cNTRType) {
+        this.cNTRType = cNTRType;
+    }
+
+    public String getcNTRDate() {
+        return cNTRDate;
+    }
+
+    public void setcNTRDate(String cNTRDate) {
+        this.cNTRDate = cNTRDate;
+    }
+
+    public String getTransport() {
+        return transport;
+    }
+
+    public void setTransport(String transport) {
+        this.transport = transport;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public String getTerminal() {
+        return terminal;
+    }
+
+    public void setTerminal(String terminal) {
+        this.terminal = terminal;
+    }
+
+    public Boolean getcI() {
+        return cI;
+    }
+
+    public void setcI(Boolean cI) {
+        this.cI = cI;
+    }
+
+    public Boolean getcCP() {
+        return cCP;
+    }
+
+    public void setcCP(Boolean cCP) {
+        this.cCP = cCP;
+    }
+
+    public Boolean getTaxFolio() {
+        return taxFolio;
+    }
+
+    public void setTaxFolio(Boolean taxFolio) {
+        this.taxFolio = taxFolio;
+    }
+
+    public Boolean getLoadManoeuvre() {
+        return loadManoeuvre;
+    }
+
+    public void setLoadManoeuvre(Boolean loadManoeuvre) {
+        this.loadManoeuvre = loadManoeuvre;
+    }
+
+    public Boolean getpISVinculation() {
+        return pISVinculation;
+    }
+
+    public void setpISVinculation(Boolean pISVinculation) {
+        this.pISVinculation = pISVinculation;
+    }
+
+    public LocalDateTime getPortDepartureDate() {
+        return portDepartureDate;
+    }
+
+    public void setPortDepartureDate(LocalDateTime portDepartureDate) {
+        this.portDepartureDate = portDepartureDate;
+    }
+
+    public LocalDateTime getPortArrivalDate() {
+        return portArrivalDate;
+    }
+
+    public void setPortArrivalDate(LocalDateTime portArrivalDate) {
+        this.portArrivalDate = portArrivalDate;
+    }
+
+    public LocalDateTime getPortUnloadDate() {
+        return portUnloadDate;
+    }
+
+    public void setPortUnloadDate(LocalDateTime portUnloadDate) {
+        this.portUnloadDate = portUnloadDate;
+    }
+
+    public String getVacumManoeuvre() {
+        return vacumManoeuvre;
+    }
+
+    public void setVacumManoeuvre(String vacumManoeuvre) {
+        this.vacumManoeuvre = vacumManoeuvre;
+    }
+
+    public String getPOD() {
+        return POD;
+    }
+
+    public void setPOD(String POD) {
+        this.POD = POD;
+    }
+
+    public String getVacumArrival() {
+        return vacumArrival;
+    }
+
+    public void setVacumArrival(String vacumArrival) {
+        this.vacumArrival = vacumArrival;
+    }
+
+    public String getEIR() {
+        return EIR;
+    }
+
+    public void setEIR(String EIR) {
+        this.EIR = EIR;
+    }
+
+    public String getObservations() {
+        return observations;
+    }
+
+    public void setObservations(String observations) {
+        this.observations = observations;
+    }
+}
