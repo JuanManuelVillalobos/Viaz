@@ -65,41 +65,6 @@ public class Shipment {
     private String observations;
 
 
-
-    public Shipment(String serviceType, String customerService, String client, String origin, String customsAgent, String destination, String status, String container, String cNTRType, LocalDateTime cNTRDate, String transport, String operator, String terminal, Boolean cI, Boolean cCP, Boolean taxFolio, Boolean loadManoeuvre, Boolean pISVinculation, LocalDate portDepartureDate, LocalDateTime portArrivalDate, LocalDateTime portUnloadDate, String vacumManoeuvre, String POD, LocalDate PODDate, LocalDate vacumArrival, String EIR, String observations) {
-        this.serviceType = serviceType;
-        this.customerService = customerService;
-        this.client = client;
-        this.origin = origin;
-        this.customsAgent = customsAgent;
-        this.destination = destination;
-        this.status = status;
-        this.container = container;
-        this.cNTRType = cNTRType;
-        this.cNTRDate = cNTRDate;
-        this.transport = transport;
-        this.operator = operator;
-        this.terminal = terminal;
-        this.cI = cI;
-        this.cCP = cCP;
-        this.taxFolio = taxFolio;
-        this.loadManoeuvre = loadManoeuvre;
-        this.pISVinculation = pISVinculation;
-        this.portDepartureDate = portDepartureDate;
-        this.portArrivalDate = portArrivalDate;
-        this.portUnloadDate = portUnloadDate;
-        this.vacumManoeuvre = vacumManoeuvre;
-        this.POD = POD;
-        this.PODDate = PODDate;
-        this.vacumArrival = vacumArrival;
-        this.EIR = EIR;
-        this.observations = observations;
-    }
-
-    public Shipment() {
-
-    }
-
     public Long getViazId() {
         return viazId;
     }
