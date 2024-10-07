@@ -2,12 +2,14 @@ package com.example.viaz.shipment;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity(name = "shipment")
+@DynamicUpdate
 public class Shipment {
     @Id
     @SequenceGenerator(
@@ -30,7 +32,7 @@ public class Shipment {
     private String container;
     private String cNTRType;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime cNTRDate;
 
     private String transport;
@@ -62,7 +64,9 @@ public class Shipment {
     private String EIR;
     private String observations;
 
-    public Shipment(String serviceType, String customerService, String client, String origin, String customsAgent, String destination, String status, String container, String cNTRType, String cNTRDate, String transport, String operator, String terminal, Boolean cI, Boolean cCP, Boolean taxFolio, Boolean loadManoeuvre, Boolean pISVinculation, LocalDate portDepartureDate, LocalDateTime portArrivalDate, LocalDateTime portUnloadDate, String vacumManoeuvre, String POD, LocalDate PODDate, LocalDate vacumArrival, String EIR, String observations) {
+
+
+    public Shipment(String serviceType, String customerService, String client, String origin, String customsAgent, String destination, String status, String container, String cNTRType, LocalDateTime cNTRDate, String transport, String operator, String terminal, Boolean cI, Boolean cCP, Boolean taxFolio, Boolean loadManoeuvre, Boolean pISVinculation, LocalDate portDepartureDate, LocalDateTime portArrivalDate, LocalDateTime portUnloadDate, String vacumManoeuvre, String POD, LocalDate PODDate, LocalDate vacumArrival, String EIR, String observations) {
         this.serviceType = serviceType;
         this.customerService = customerService;
         this.client = client;
@@ -90,6 +94,10 @@ public class Shipment {
         this.vacumArrival = vacumArrival;
         this.EIR = EIR;
         this.observations = observations;
+    }
+
+    public Shipment() {
+
     }
 
     public Long getViazId() {
@@ -172,11 +180,11 @@ public class Shipment {
         this.cNTRType = cNTRType;
     }
 
-    public String getcNTRDate() {
+    public LocalDateTime getcNTRDate() {
         return cNTRDate;
     }
 
-    public void setcNTRDate(String cNTRDate) {
+    public void setcNTRDate(LocalDateTime cNTRDate) {
         this.cNTRDate = cNTRDate;
     }
 
@@ -244,11 +252,11 @@ public class Shipment {
         this.pISVinculation = pISVinculation;
     }
 
-    public LocalDateTime getPortDepartureDate() {
+    public LocalDate getPortDepartureDate() {
         return portDepartureDate;
     }
 
-    public void setPortDepartureDate(LocalDateTime portDepartureDate) {
+    public void setPortDepartureDate(LocalDate portDepartureDate) {
         this.portDepartureDate = portDepartureDate;
     }
 
@@ -284,11 +292,19 @@ public class Shipment {
         this.POD = POD;
     }
 
-    public String getVacumArrival() {
+    public LocalDate getPODDate() {
+        return PODDate;
+    }
+
+    public void setPODDate(LocalDate PODDate) {
+        this.PODDate = PODDate;
+    }
+
+    public LocalDate getVacumArrival() {
         return vacumArrival;
     }
 
-    public void setVacumArrival(String vacumArrival) {
+    public void setVacumArrival(LocalDate vacumArrival) {
         this.vacumArrival = vacumArrival;
     }
 
