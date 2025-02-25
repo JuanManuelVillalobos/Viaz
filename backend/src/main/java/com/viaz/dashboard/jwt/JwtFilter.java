@@ -1,12 +1,12 @@
 package com.viaz.dashboard.jwt;
 
-import com.viaz.dashboard.jwt.blacklist.BlacklistService;
 import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,13 +23,13 @@ public class JwtFilter extends OncePerRequestFilter {
     private final com.viaz.dashboard.jwt.JwtUtil JwtUtil;
     private final ApplicationContext applicationContext;
 
-    public JwtFilter(JwtUtil JwtUtil, ApplicationContext applicationContext, BlacklistService blacklistService) {
+    public JwtFilter(JwtUtil JwtUtil, ApplicationContext applicationContext) {
         this.JwtUtil = JwtUtil;
         this.applicationContext = applicationContext;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
 

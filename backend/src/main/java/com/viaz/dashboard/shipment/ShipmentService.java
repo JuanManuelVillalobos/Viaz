@@ -38,10 +38,6 @@ public class ShipmentService {
         return shipmentRepository.getPendingShipments();
     }
 
-    public Page<Shipment> getShipments(int page, int size) {
-        return shipmentRepository.findAll(PageRequest.of(page, size));
-    }
-
     public Shipment createShipment(Shipment shipment) {
         shipment.setViazId(shipmentIdGeneratorService.generateShipmentId());
         shipment.setYear(Year.now().getValue());

@@ -1,7 +1,6 @@
 package com.viaz.dashboard.jwt.blacklist;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
