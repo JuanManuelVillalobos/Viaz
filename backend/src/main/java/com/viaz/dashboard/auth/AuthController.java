@@ -2,8 +2,11 @@ package com.viaz.dashboard.auth;
 
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.user.ViazUser;
+import com.viaz.dashboard.user.ViazUserDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -20,6 +23,11 @@ public class AuthController {
     public String ping(HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_OK);
         return "pong";
+    }
+    // Get all users using Data Transfer Object
+    @GetMapping("/get-all-users")
+    public List<ViazUserDTO> getAllUsers() {
+        return authService.getAllUsers();
     }
 
     // Register User
