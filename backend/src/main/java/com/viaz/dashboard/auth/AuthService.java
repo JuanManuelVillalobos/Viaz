@@ -4,6 +4,7 @@ import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
 import com.viaz.dashboard.user.ViazUser;
+import com.viaz.dashboard.user.ViazUserDTO;
 import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
 import com.viaz.dashboard.user.UserRepository;
 import io.jsonwebtoken.JwtException;
@@ -17,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -91,6 +94,19 @@ public class AuthService {
         String username = jwtUtil.extractUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);
         return new Token(newAccessToken, userDetails.getUsername());
+    }
+
+    public ViazUserDTO convertToDTO(ViazUser user) {
+        if (user == null) {
+            return null;
+        }
+        return new ViazUserDTO(user.getUserId(), user.getUsername(), user.getEmail());
+    }
+
+    public List<ViazUserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
 }
