@@ -2,7 +2,11 @@ package com.viaz.dashboard.auth;
 
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.Token;
-import com.viaz.dashboard.auth.userDetails.CustomUserDetailsService;
+import com.viaz.dashboard.jwt.blacklist.BlacklistService;
+import com.viaz.dashboard.user.ViazUser;
+import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
+import com.viaz.dashboard.user.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,19 +16,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final ViazUserDetailsService viazUserDetailsService;
+    private final BlacklistService blacklistService;
 
-    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService) {
+    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, ViazUserDetailsService viazUserDetailsService, BlacklistService blacklistService) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.customUserDetailsService = customUserDetailsService;
+        this.viazUserDetailsService = viazUserDetailsService;
+        this.blacklistService = blacklistService;
     }
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
@@ -34,7 +42,7 @@ public class AuthService {
         return userRepository.save(viazUser);
     }
 
-    public Token verify(ViazUser viazUser, HttpServletResponse response) {
+    public Token login(ViazUser viazUser, HttpServletResponse response) {
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
@@ -51,21 +59,34 @@ public class AuthService {
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/api/");
         refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 Days
-        //   TODO SET TRUE
-        //    refreshTokenCookie.setSecure(true);
+//        refreshTokenCookie.setSecure(true);
         response.addCookie(refreshTokenCookie);
 
         return new Token(accessToken, username);
 
     }
 
+    public void logout(String refreshToken) {
+        Date expirationDate = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30); // 30days
+        blacklistService.addToBlacklist(refreshToken, expirationDate);
+    }
+
     public Token refreshAccessToken(String refreshToken) {
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(jwtUtil.extractUsername(refreshToken));
+        UserDetails userDetails = viazUserDetailsService.loadUserByUsername(jwtUtil.extractUsername(refreshToken));
 
 
-        if (refreshToken.isEmpty() || !jwtUtil.validateToken(refreshToken, userDetails)) {
+        if (refreshToken.isEmpty()) {
             return null;
         }
+
+        if (!jwtUtil.validateToken(refreshToken, userDetails)){
+            return null;
+        }
+
+        if (blacklistService.isBlacklisted(refreshToken)) {
+            throw new JwtException("Revoked token");
+        }
+
 
         String username = jwtUtil.extractUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);
