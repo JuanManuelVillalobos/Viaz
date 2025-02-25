@@ -1,4 +1,4 @@
-package com.viaz.dashboard.auth;
+package com.viaz.dashboard.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
