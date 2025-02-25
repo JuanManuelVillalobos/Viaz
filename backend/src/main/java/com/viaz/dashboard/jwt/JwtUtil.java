@@ -49,7 +49,7 @@ public class JwtUtil {
                 .add(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * validity ))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * validity))
                 .and()
                 .signWith(getKey())
                 .compact();
