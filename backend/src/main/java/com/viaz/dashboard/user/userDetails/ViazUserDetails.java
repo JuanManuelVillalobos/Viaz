@@ -1,6 +1,6 @@
-package com.viaz.dashboard.auth.userDetails;
+package com.viaz.dashboard.user.userDetails;
 
-import com.viaz.dashboard.auth.ViazUser;
+import com.viaz.dashboard.user.ViazUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,18 +8,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-public class UserPrincipal implements UserDetails {
+public class ViazUserDetails implements UserDetails {
 
     private final ViazUser viazUser;
 
-    public UserPrincipal(ViazUser viazUser) {
+    public ViazUserDetails(ViazUser viazUser) {
         this.viazUser = viazUser;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return List.of();
-        return Collections.singleton(new SimpleGrantedAuthority("USER")) ;
+//        return viazUser.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
+        return Collections.singletonList(new SimpleGrantedAuthority("ADMIN"));
     }
 
     @Override
