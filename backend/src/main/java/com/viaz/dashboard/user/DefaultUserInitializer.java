@@ -1,0 +1,37 @@
+package com.viaz.dashboard.user;
+
+import com.viaz.dashboard.auth.AuthService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DefaultUserInitializer implements CommandLineRunner {
+
+
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final String defaultAdminUsername;
+    private final String defaultAdminPassword;
+
+    public DefaultUserInitializer( @Value("${default.admin.user}") String defaultAdminUser, @Value("${default.admin.password}") String defaultAdminPassword ,UserRepository userRepository, AuthService authService) {
+        this.userRepository = userRepository;
+        this.authService = authService;
+        this.defaultAdminUsername = defaultAdminUser;
+        this.defaultAdminPassword = defaultAdminPassword;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        String defaultEmail = "admin@example.com";
+
+        if (userRepository.findByUsername(defaultAdminUsername) == null) {
+            // Create a new user if it does not exist
+            ViazUser defaultViazUser = new ViazUser(defaultAdminUsername, defaultAdminPassword, defaultEmail);
+            authService.registerUser(defaultViazUser);
+            System.out.println("Default user created: " + defaultAdminUsername);
+        } else {
+            System.out.println("Default user already exists: " + defaultAdminUsername);
+        }
+    }
+}
