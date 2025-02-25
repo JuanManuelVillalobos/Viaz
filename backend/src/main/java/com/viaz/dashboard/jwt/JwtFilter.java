@@ -1,6 +1,7 @@
 package com.viaz.dashboard.jwt;
 
-import com.viaz.dashboard.auth.userDetails.CustomUserDetailsService;
+import com.viaz.dashboard.jwt.blacklist.BlacklistService;
+import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,7 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final com.viaz.dashboard.jwt.JwtUtil JwtUtil;
     private final ApplicationContext applicationContext;
 
-    public JwtFilter(JwtUtil JwtUtil, ApplicationContext applicationContext) {
+    public JwtFilter(JwtUtil JwtUtil, ApplicationContext applicationContext, BlacklistService blacklistService) {
         this.JwtUtil = JwtUtil;
         this.applicationContext = applicationContext;
     }
@@ -46,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             jwtToken = authHeader.substring(7);
             username = JwtUtil.extractUsername(jwtToken);
         } catch (ExpiredJwtException e) {
-            throw new ExpiredJwtException(null,null,"Expired JWT token");
+            throw new ExpiredJwtException(null, null, "Expired JWT token");
         }
 
 
@@ -56,13 +57,12 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         UserDetails userDetails = applicationContext
-                .getBean(CustomUserDetailsService.class)
+                .getBean(ViazUserDetailsService.class)
                 .loadUserByUsername(username);
 
         if (!JwtUtil.validateToken(jwtToken, userDetails)) {
             // Token is invalid or expired
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
-            response.getWriter().write("Invalid or expired JWT token");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
             return;
         }
 
