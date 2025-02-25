@@ -22,7 +22,7 @@ public class DefaultUserInitializer implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         String defaultEmail = "admin@example.com";
 
         if (userRepository.findByUsername(defaultAdminUsername) == null) {
