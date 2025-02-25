@@ -2,8 +2,6 @@ package com.viaz.dashboard.shipment;
 
 import com.viaz.dashboard.shipment.idGenerator.ShipmentIdGeneratorService;
 import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
