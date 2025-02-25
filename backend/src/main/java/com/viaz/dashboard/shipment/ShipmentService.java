@@ -1,13 +1,16 @@
 package com.viaz.dashboard.shipment;
 
 import com.viaz.dashboard.shipment.idGenerator.ShipmentIdGeneratorService;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.time.Year;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -21,6 +24,7 @@ public class ShipmentService {
         this.shipmentIdGeneratorService = shipmentIdGeneratorService;
     }
 
+
     public Shipment getShipmentById(String viazId) {
         return shipmentRepository.findByViazId(viazId);
     }
@@ -30,14 +34,12 @@ public class ShipmentService {
         return shipmentRepository.findAll(Sort.by("viazId").descending());
     }
 
-    public Page<Shipment> getShipments(int page, int size) {
-        return shipmentRepository.findAll(PageRequest.of(page, size));
+    public List<Shipment> getPendingShipments() {
+        return shipmentRepository.getPendingShipments();
     }
 
-    public List<Shipment> getLastFiveShipments() {
-        return shipmentRepository.findLastFiveShipments().stream()
-                .limit(5)
-                .toList();
+    public Page<Shipment> getShipments(int page, int size) {
+        return shipmentRepository.findAll(PageRequest.of(page, size));
     }
 
     public Shipment createShipment(Shipment shipment) {
@@ -49,9 +51,32 @@ public class ShipmentService {
         return shipmentRepository.save(shipment);
     }
 
-    public void deleteShipment(Long viazId) {
-        shipmentRepository.deleteById(viazId);
+    @Transactional
+    public void deleteShipment(String viazId) {
+        shipmentRepository.deleteByViazID(viazId);
     }
+
+
+    public Shipment updateShipment(String viazId, Map<String, Object> updates) {
+        Shipment existingShipment = getShipmentById(viazId);
+
+        updates.forEach((key, value) -> {
+            try {
+                Field field = Shipment.class.getDeclaredField(key);
+                field.setAccessible(true);
+                field.set(existingShipment, value);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                // TODO: Handle Error (e.g., log the error or throw a custom exception)
+            }
+        });
+
+        // Save the updated shipment back to the database
+        shipmentRepository.save(existingShipment);
+
+
+        return getShipmentById(viazId); // Return the updated shipment
+    }
+
 
     /**
      * Extracts the sequence number from the shipment ID of the format "vz-[currentYear]-[sequence]"
@@ -70,5 +95,4 @@ public class ShipmentService {
             throw new IllegalArgumentException("Invalid shipment ID format: " + viazID);
         }
     }
-
 }
