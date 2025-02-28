@@ -3,6 +3,7 @@ package com.viaz.dashboard.auth;
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.user.ViazUser;
 import com.viaz.dashboard.user.ViazUserDTO;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +33,8 @@ public class AuthController {
 
     // Register User
     @PostMapping("/register")
-    public ViazUser createUser(@RequestBody ViazUser viazUser) {
-        return authService.registerUser(viazUser);
+    public ViazUser registerUser(@RequestBody ViazUserDTO viazUser) throws MessagingException {
+        return authService.register(viazUser);
     }
 
     //    Login User
