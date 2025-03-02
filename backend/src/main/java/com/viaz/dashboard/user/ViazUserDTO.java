@@ -20,8 +20,4 @@ public class ViazUserDTO {
     @NotBlank(message = "Email is mandatory")
     private String email;
 
-    public ViazUserDTO(String username, String email) {
-        this.username = username;
-        this.email = email;
-    }
 }
