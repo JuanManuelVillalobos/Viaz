@@ -20,7 +20,6 @@ public class ViazUser {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -38,6 +37,11 @@ public class ViazUser {
     public ViazUser(String username, String password, String email) {
         this.username = username;
         this.password = password;
+        this.email = email;
+    }
+
+    public ViazUser(String username, String email) {
+        this.username = username;
         this.email = email;
     }
 }
