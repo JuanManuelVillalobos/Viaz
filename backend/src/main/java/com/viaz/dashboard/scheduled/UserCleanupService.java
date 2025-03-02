@@ -1,7 +1,6 @@
 package com.viaz.dashboard.scheduled;
 
 import com.viaz.dashboard.auth.AuthService;
-import com.viaz.dashboard.jwt.blacklist.BlacklistService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
