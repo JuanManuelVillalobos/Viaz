@@ -1,6 +1,5 @@
 package com.viaz.dashboard.user;
 
-import com.viaz.dashboard.auth.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,7 @@ public class DefaultUserInitializer implements CommandLineRunner {
     private final String defaultAdminPassword;
     private final UserService userService;
 
-    public DefaultUserInitializer(@Value("${default.admin.user}") String defaultAdminUser, @Value("${default.admin.password}") String defaultAdminPassword , UserRepository userRepository, AuthService authService, UserService userService) {
+    public DefaultUserInitializer(@Value("${default.admin.user}") String defaultAdminUser, @Value("${default.admin.password}") String defaultAdminPassword , UserRepository userRepository, UserService userService) {
         this.userRepository = userRepository;
         this.defaultAdminUsername = defaultAdminUser;
         this.defaultAdminPassword = defaultAdminPassword;
