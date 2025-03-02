@@ -10,14 +10,12 @@ public class DefaultUserInitializer implements CommandLineRunner {
 
 
     private final UserRepository userRepository;
-    private final AuthService authService;
     private final String defaultAdminUsername;
     private final String defaultAdminPassword;
     private final UserService userService;
 
     public DefaultUserInitializer(@Value("${default.admin.user}") String defaultAdminUser, @Value("${default.admin.password}") String defaultAdminPassword , UserRepository userRepository, AuthService authService, UserService userService) {
         this.userRepository = userRepository;
-        this.authService = authService;
         this.defaultAdminUsername = defaultAdminUser;
         this.defaultAdminPassword = defaultAdminPassword;
         this.userService = userService;
