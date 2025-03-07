@@ -41,7 +41,7 @@ public class ShipmentController {
     }
 
     @DeleteMapping(path = "/delete-shipment/{viazId}")
-    public void deleteStudent(@PathVariable("viazId") String viazId) {
+    public void deleteShipment(@PathVariable("viazId") String viazId) {
         shipmentService.deleteShipment(viazId);
     }
 

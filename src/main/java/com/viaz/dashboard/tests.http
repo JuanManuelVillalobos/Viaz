@@ -1,0 +1,72 @@
+### Login with default user
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+### Login with other user
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+}
+
+
+
+### Create Unvalidated User
+POST localhost:8080/api/auth/register
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0MTIwMTExOCwiZXhwIjoxNzQxMjAxNzE4fQ.15OjNBr9GC9aDrDR1AA8x-wVL9LrKWTg6YUpFkaIXGds1pSuI0D1bXW4Dqf-gyj97jFlwx68tcGdLtxtUN7wlg
+Content-Type: application/json
+
+{
+  "username": "Juanma",
+  "email": "juanmavillalobosn@gmail.com"
+}
+
+### Register User With Password
+POST localhost:8080/api/auth/set-password?token=Ski8SnFd7aibqZyzveUq8Vn4xTvsLQWzwpHgMJS-pB4&email=juanmavillalobosn@gmail.com
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0MTIwMTExOCwiZXhwIjoxNzQxMjAxNzE4fQ.15OjNBr9GC9aDrDR1AA8x-wVL9LrKWTg6YUpFkaIXGds1pSuI0D1bXW4Dqf-gyj97jFlwx68tcGdLtxtUN7wlg
+Content-Type: text/plain
+
+password123
+
+### Logout and invalidate JWT
+POST http://localhost:8080/api/auth/logout
+Content-Type: application/json
+Authorization:
+
+### Refresh Token
+POST localhost:8080/api/auth/refresh-token
+
+
+### Get Shipments
+GET localhost:8080/api/shipment/get-all-shipments
+Authorization:
+
+### Get Users
+GET localhost:8080/api/user/get-all-users
+Authorization:
+
+### Delete User
+DELETE localhost:8080/api/user/delete-user/3
+Authorization:
+
+### Get Pending Shipments
+GET localhost:8080/api/shipment/get-pending-shipments
+Authorization:
+
+### Patch Shipment
+PATCH localhost:8080/api/shipment/update-shipment/VZ-2025-002
+
+
+### Delete Shipment
+DELETE http://localhost:8080/api/shipment/delete-shipment/VZ-2025-014
+Authorization:
+
+### Create Shipment
+POST http://localhost:8080/api/shipment/create-shipment
+Authorization:
+Content-Type: application/json

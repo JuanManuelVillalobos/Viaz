@@ -6,9 +6,8 @@ import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
 import com.viaz.dashboard.user.UserService;
 import com.viaz.dashboard.user.ViazUser;
-import com.viaz.dashboard.user.ViazUserDTO;
+import com.viaz.dashboard.user.helpers.ViazUserDTO;
 import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
-import com.viaz.dashboard.user.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
@@ -17,17 +16,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final ViazUserDetailsService viazUserDetailsService;
@@ -35,8 +30,7 @@ public class AuthService {
     private final EmailService emailService;
     private final UserService userService;
 
-    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, ViazUserDetailsService viazUserDetailsService, BlacklistService blacklistService, EmailService emailService, UserService userService) {
-        this.userRepository = userRepository;
+    public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil, ViazUserDetailsService viazUserDetailsService, BlacklistService blacklistService, EmailService emailService, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.viazUserDetailsService = viazUserDetailsService;
@@ -48,18 +42,22 @@ public class AuthService {
     public ViazUser register(ViazUserDTO viazUser) throws MessagingException {
         emailService.sendInvitationEmail(viazUser.getEmail());
         ViazUser user = new ViazUser(viazUser.getUsername(), viazUser.getEmail());
-        return userRepository.save(user);
+        return userService.createUnValidatedUser(user);
     }
 
     public Token login(ViazUser viazUser, HttpServletResponse response) {
-        Authentication authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                viazUser.getUsername(), viazUser.getPassword()));
+        String identifier = viazUser.getUsername();
+        String password = viazUser.getPassword();
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(identifier, password)
+        );
+
         if (!authentication.isAuthenticated()) {
             return null;
         }
-        String username = viazUser.getUsername();
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
         String accessToken = jwtUtil.generateAccessToken(username);
         String refreshToken = jwtUtil.generateRefreshToken(username);
 
@@ -80,30 +78,36 @@ public class AuthService {
 
     public Token refreshAccessToken(String refreshToken) {
         UserDetails userDetails = viazUserDetailsService.loadUserByUsername(jwtUtil.extractUsername(refreshToken));
-
-
         if (refreshToken.isEmpty()) {
-            return null;}
-
-        if (!jwtUtil.validateToken(refreshToken, userDetails)){
-            return null;}
-
+            return null;
+        }
+        if (!jwtUtil.validateToken(refreshToken, userDetails)) {
+            return null;
+        }
         if (blacklistService.isBlacklisted(refreshToken)) {
-            throw new JwtException("Revoked token");}
-
+            throw new JwtException("Revoked token");
+        }
         String username = jwtUtil.extractUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);
         return new Token(newAccessToken, userDetails.getUsername());
     }
 
-    public void deleteExpiredInvites(){
-        List<ViazUser> usersWithNullPassword = userRepository.findByPasswordIsNull();
-        userRepository.deleteAll(usersWithNullPassword);
+    public ViazUserDTO changePassword(String email, String newPassword, String token) throws Exception {
+        // Check if the token is valid for the given email
+        String storedToken = emailService.getToken(email);
+        if (storedToken != null && storedToken.equals(token)) {
+            // Change the password and save the DTO
+            ViazUserDTO changedPasswordUser = userService.changePassword(email, newPassword);
+
+            // After successfully changing the password, remove the token
+            emailService.removeToken(email);
+            return changedPasswordUser;
+        }
+        return null; // Token is invalid or does not match
     }
 
-     public List<ViazUserDTO> getAllUsers() {
-        return userService.getAllUsers();
+    public void deleteExpiredInvites() {
+        userService.deleteUsersWithNullPassword();
     }
-
 
 }
