@@ -59,13 +59,8 @@ GET localhost:8080/api/shipment/get-pending-shipments
 Authorization:
 
 ### Patch Shipment
-PATCH localhost:8080/api/shipment/update-shipment/VZ-2025-014
-Authorization:
-Content-Type: application/json
+PATCH localhost:8080/api/shipment/update-shipment/VZ-2025-002
 
-{
-  "typeOfService" : "M"
-}
 
 ### Delete Shipment
 DELETE http://localhost:8080/api/shipment/delete-shipment/VZ-2025-014
