@@ -26,6 +26,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response); // Proceed with the request
         } else {
             response.setStatus(429); // 429 Too Many Requests
+            logger.warn("Rate limit exceeded");
         }
     }
 }

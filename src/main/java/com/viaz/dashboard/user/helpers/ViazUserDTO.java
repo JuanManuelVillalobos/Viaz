@@ -1,4 +1,4 @@
-package com.viaz.dashboard.user;
+package com.viaz.dashboard.user.helpers;
 
 
 import jakarta.validation.constraints.Email;

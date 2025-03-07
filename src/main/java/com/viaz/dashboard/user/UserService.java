@@ -1,5 +1,7 @@
 package com.viaz.dashboard.user;
 
+import com.viaz.dashboard.user.helpers.ViazUserDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,33 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public ViazUserDTO changePassword(String viazUserEmail, String newPassword) throws Exception {
+        ViazUser user = userRepository.findByEmail(viazUserEmail);
+        if (user == null) {
+            throw new Exception("No user with email " + viazUserEmail);
+        }
+        String hashedPassword = encoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+
+        userRepository.save(user);
+
+        return convertToDTO(user);
+    }
+
+    public ViazUser createUnValidatedUser(ViazUser user) {
+        return userRepository.save(user);
+    }
+
+    public void deleteUsersWithNullPassword() {
+        List<ViazUser> usersWithNullPassword = userRepository.findByPasswordIsNull();
+        userRepository.deleteAll(usersWithNullPassword);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        userRepository.deleteByUserId(userId);
     }
 
 }

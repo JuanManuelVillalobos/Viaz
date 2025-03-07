@@ -1,5 +1,8 @@
-package com.viaz.dashboard.user;
+package com.viaz.dashboard.user.helpers;
 
+import com.viaz.dashboard.user.UserRepository;
+import com.viaz.dashboard.user.UserService;
+import com.viaz.dashboard.user.ViazUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

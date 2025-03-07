@@ -14,7 +14,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     @Query("SELECT s FROM shipment s WHERE LOWER(s.shipmentStatus) != LOWER('egresado') ORDER BY s.viazId DESC")
     List<Shipment> getPendingShipments();
 
-    @Transactional
     @Modifying
     @Query("DELETE FROM shipment s WHERE s.viazId = :viazID")
     void deleteByViazID(String viazID);

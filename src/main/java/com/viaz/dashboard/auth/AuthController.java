@@ -2,12 +2,10 @@ package com.viaz.dashboard.auth;
 
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.user.ViazUser;
-import com.viaz.dashboard.user.ViazUserDTO;
+import com.viaz.dashboard.user.helpers.ViazUserDTO;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @RestController
@@ -20,21 +18,15 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/ping")
-    public String ping(HttpServletResponse response) {
-        response.setStatus(HttpServletResponse.SC_OK);
-        return "pong";
-    }
-    // Get all users using Data Transfer Object
-    @GetMapping("/get-all-users")
-    public List<ViazUserDTO> getAllUsers() {
-        return authService.getAllUsers();
-    }
-
     // Register User
     @PostMapping("/register")
     public ViazUser registerUser(@RequestBody ViazUserDTO viazUser) throws MessagingException {
         return authService.register(viazUser);
+    }
+
+    @PostMapping("/set-password")
+    public ViazUserDTO createUser(@RequestBody String viazUserPassword, @RequestParam String email, @RequestParam String token) throws Exception {
+        return authService.changePassword(email,viazUserPassword,token);
     }
 
     //    Login User

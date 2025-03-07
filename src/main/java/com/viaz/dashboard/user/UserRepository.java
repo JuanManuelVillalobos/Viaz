@@ -8,4 +8,8 @@ public interface UserRepository extends JpaRepository<ViazUser, Long> {
     ViazUser findByUsername(String username);
 
     List<ViazUser> findByPasswordIsNull();
+
+    ViazUser findByEmail(String email);
+
+    void deleteByUserId(Long userId);
 }
