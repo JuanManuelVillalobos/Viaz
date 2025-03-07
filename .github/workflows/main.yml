@@ -1,0 +1,38 @@
+name: Spring Boot CI/CD
+
+on:
+  workflow_run:
+    workflows: ["React CI/CD"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download React build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: react-build
+
+      - name: Copy build to Spring Boot static files
+        run: |
+          cp -r dist/* src/main/resources/static/
+
+      - name: Build Docker image
+        run: |
+          docker build -t your-image-name .
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker image
+        run: |
+          docker push your-image-name
