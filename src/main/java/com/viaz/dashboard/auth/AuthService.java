@@ -8,7 +8,6 @@ import com.viaz.dashboard.user.UserService;
 import com.viaz.dashboard.user.ViazUser;
 import com.viaz.dashboard.user.helpers.ViazUserDTO;
 import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
-import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 
 @Service
@@ -40,14 +40,15 @@ public class AuthService {
     }
 
     public ViazUser register(ViazUserDTO viazUser) throws MessagingException {
-        emailService.sendInvitationEmail(viazUser.getEmail());
-        ViazUser user = new ViazUser(viazUser.getUsername(), viazUser.getEmail());
+        emailService.sendInvitationEmail(viazUser.email());
+        ViazUser user = new ViazUser(viazUser.username(), viazUser.email());
         return userService.createUnValidatedUser(user);
     }
 
     public Token login(ViazUser viazUser, HttpServletResponse response) {
-        String identifier = viazUser.getUsername();
+        String identifier = userService.getUsernameByEmail(viazUser.getEmail());
         String password = viazUser.getPassword();
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(identifier, password)
         );
@@ -65,7 +66,8 @@ public class AuthService {
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/api/");
         refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 Days
-        refreshTokenCookie.setSecure(true);
+//        TODO Have https certificate
+//        refreshTokenCookie.setSecure(true);
         response.addCookie(refreshTokenCookie);
 
         return new Token(accessToken, username);
@@ -76,7 +78,7 @@ public class AuthService {
         blacklistService.addToBlacklist(refreshToken, expirationDate);
     }
 
-    public Token refreshAccessToken(String refreshToken) {
+    public Token refreshAccessToken(String refreshToken, HttpServletResponse response) throws IOException {
         UserDetails userDetails = viazUserDetailsService.loadUserByUsername(jwtUtil.extractUsername(refreshToken));
         if (refreshToken.isEmpty()) {
             return null;
@@ -85,7 +87,9 @@ public class AuthService {
             return null;
         }
         if (blacklistService.isBlacklisted(refreshToken)) {
-            throw new JwtException("Revoked token");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\": \"Revoked Token\"}");
+            return null;
         }
         String username = jwtUtil.extractUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);
@@ -110,4 +114,13 @@ public class AuthService {
         userService.deleteUsersWithNullPassword();
     }
 
+    public void forgotPassword(String email) throws MessagingException {
+        emailService.sendPasswordResetEmail(email);
+    }
+
+    // Helper method to check if the identifier is an email
+    private boolean isEmail(String identifier) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return identifier.matches(emailRegex);
+    }
 }
