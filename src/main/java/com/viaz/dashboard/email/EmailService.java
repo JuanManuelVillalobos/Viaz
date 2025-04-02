@@ -79,7 +79,7 @@ public class EmailService {
         userTokens.remove(email);
     }
 
-    private static String getPasswordResetMessage(String to, String confirmationUrl) {
+    private String getPasswordResetMessage(String to, String confirmationUrl) {
         // Create the plain text message
         String plainTextMessage = "Dear User,\n\n" +
                 "We received a request to reset the password for your account associated with this email address: " + to + ".\n\n" +
@@ -113,13 +113,7 @@ public class EmailService {
                 "</body>" +
                 "</html>";
 
-        // Combine the plain text and HTML messages
-        String message = "<html><body>" +
-                "<p style='display:none;'>" + plainTextMessage + "</p>" + // Include plain text for email clients that don't support HTML
-                htmlMessage +
-                "</body></html>";
-
-        return message;
+         return getMessage(plainTextMessage, htmlMessage);
     }
 
     private String getInvitationMessage(String invitationUrl) {
@@ -155,12 +149,14 @@ public class EmailService {
                 "</html>";
 
         // Combine the plain text and HTML messages
-        String message = "<html><body>" +
+        return getMessage(plainTextMessage, htmlMessage);
+    }
+
+    private String getMessage(String plainTextMessage, String htmlMessage) {
+        return "<html><body>" +
                 "<p style='display:none;'>" + plainTextMessage + "</p>" + // Include plain text for email clients that don't support HTML
                 htmlMessage +
                 "</body></html>";
-
-        return message;
     }
 }
 
