@@ -1,0 +1,69 @@
+#### SPRING
+spring:
+### DATABASE
+  datasource:
+    url: jdbc:postgresql://${DATABASE_URL}:5432/postgres
+    username: ViazDatabase
+    password: ${VIAZ_DATABASE_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        dialect:
+           org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+###
+
+### EMAIL SERVICE
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: viazdashboard@gmail.com
+    password: ${MAIL_PASSWORD}
+    properties:
+     mail:
+       smtp:
+         auth: true
+         starttls.enable: true
+ ###
+####
+
+### DEBUG LEVEL
+server:
+  error:
+    include-message: always
+logging:
+  level:
+    org.springframework.mail: debug
+###
+
+### JWT SECRET KEY
+jwt:
+  secret:
+    key: ${JWT_SECRET}
+###
+
+### Default user after start
+default:
+  admin:
+    user: ${DEFAULT_ADMIN_USER}
+    password: ${DEFAULT_ADMIN_PASSWORD}
+###
+
+
+### FrontUrl
+frontend:
+  url: ${FRONTEND_URL}
+###
+
+### RATE LIMIT
+rate:
+  limit: ${RATE_LIMIT}
+###
+
+### AWS
+aws:
+  region: eu-east-1
+###
