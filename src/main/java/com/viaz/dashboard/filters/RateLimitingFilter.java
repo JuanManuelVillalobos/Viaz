@@ -21,15 +21,19 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest  request,
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        if (bucket.tryConsume(1)) {
-            filterChain.doFilter(request, response); // Proceed with the request
+        if (request.getRequestURI().startsWith("/api/")) {
+            if (bucket.tryConsume(1)) {
+                filterChain.doFilter(request, response); // Proceed with the request
+            } else {
+                response.setStatus(429); // 429 Too Many Requests
+                logger.warn("Rate limit exceeded");
+            }
         } else {
-            response.setStatus(429); // 429 Too Many Requests
-            logger.warn("Rate limit exceeded");
+            filterChain.doFilter(request, response);
         }
     }
 }

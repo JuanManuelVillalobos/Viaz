@@ -7,6 +7,8 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,6 +31,11 @@ public class AuthController {
         return authService.changePassword(email,viazUserPassword,token);
     }
 
+    @PostMapping("/forgot-password")
+    public void forgotPassword(@RequestBody String email) throws MessagingException {
+        authService.forgotPassword(email);
+    }
+
     //    Login User
     @PostMapping("/login")
     public Token verify(@RequestBody ViazUser viazUser, HttpServletResponse response) {
@@ -41,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public Token refresh(@CookieValue(value = "refreshToken") String refreshToken) {
-        return authService.refreshAccessToken(refreshToken);
+    public Token refresh(@CookieValue(value = "refreshToken") String refreshToken, HttpServletResponse response) throws IOException {
+        return authService.refreshAccessToken(refreshToken, response);
     }
 }

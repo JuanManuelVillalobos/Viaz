@@ -31,10 +31,10 @@ public class Shipment {
     private String destination;
     private String shipmentStatus;
     private String container;
-    private String cntrType;
+    private String containerType;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime cntrDate;
+    private LocalDateTime containerDate;
 
     private String transportProvider;
     private String shipmentOperator;
@@ -54,14 +54,14 @@ public class Shipment {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime portUnloadDate;
 
-    private String vacumManoeuvre;
-    private String pod;
+    private String vacuumManoeuvre;
+    private String portOfDischarge;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate podDate;
+    private LocalDate portOfDischargeDate;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate vacumArrival;
+    private LocalDate vacuumArrival;
     private String eir;
     private String observations;
 

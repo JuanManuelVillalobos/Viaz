@@ -1,5 +1,6 @@
-package com.viaz.dashboard.jwt;
+package com.viaz.dashboard.filters;
 
+import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -47,7 +48,17 @@ public class JwtFilter extends OncePerRequestFilter {
             jwtToken = authHeader.substring(7);
             username = JwtUtil.extractUsername(jwtToken);
         } catch (ExpiredJwtException e) {
-            throw new ExpiredJwtException(null, null, "Expired JWT token");
+            // Handle expired token
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json"); // Set content type if returning JSON
+            response.getWriter().write("{\"error\": \"JWT token is expired\"}");
+            return; // Return immediately to prevent further processing
+        } catch (Exception e) {
+            // Handle other exceptions (e.g., invalid token)
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json"); // Set content type if returning JSON
+            response.getWriter().write("{\"error\": \"Invalid JWT token\"}");
+            return; // Return immediately to prevent further processing
         }
 
 

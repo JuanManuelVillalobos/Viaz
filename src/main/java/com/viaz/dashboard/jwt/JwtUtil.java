@@ -43,7 +43,6 @@ public class JwtUtil {
 
     private String createToken(Map<String, Object> claims, String username, Long validity) {
 
-
         return Jwts.builder()
                 .claims()
                 .add(claims)

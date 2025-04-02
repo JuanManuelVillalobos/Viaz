@@ -1,9 +1,11 @@
 package com.viaz.dashboard.shipment;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 @RestController
 @RequestMapping(path = "api/shipment")
@@ -13,6 +15,7 @@ public class ShipmentController {
     public ShipmentController(ShipmentService shipmentService) {
         this.shipmentService = shipmentService;
     }
+
 
     @GetMapping("/get-all-shipments")
     public List<Shipment> getShipments() {
@@ -46,4 +49,8 @@ public class ShipmentController {
     }
 
 
+    @PostMapping("/upload-excel")
+    public ResponseEntity<String> uploadExcel(@RequestParam("file") MultipartFile file) {
+        return shipmentService.uploadExcel(file);
+    }
 }

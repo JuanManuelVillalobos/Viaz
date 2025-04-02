@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <!--        previous version 3.3.4-->
-        <version>3.4.1</version>
+        <!--        previous version 3.4.1-->
+        <version>3.4.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.viazx</groupId>
+    <groupId>com.viaz</groupId>
     <artifactId>Dashboard</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Dashboard</name>
@@ -28,9 +28,11 @@
         <url/>
     </scm>
     <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <app.image.name>viaz-dashboard</app.image.name>
+        <app.image.tag/>
     </properties>
     <dependencies>
         <dependency>
@@ -105,19 +107,135 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.31.13</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version> <!-- Use the latest version -->
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.viaz.dashboard.ViazApplication
+                            </mainClass> <!-- Replace with your actual main class -->
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <from>
+                        <image>openjdk:21</image>
+                    </from>
+                    <container>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                    </container>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
+    <profiles>
+        <profile>
+            <id>jib-push-to-local</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>push-custom-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>juanmanuelv/${app.image.name}:${app.image.tag}</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>push-latest-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>juanmanuelv/${app.image.name}:latest</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>jib-push-to-dockerhub</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>push-custom-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>docker.io/juanmanuelv/${app.image.name}:${app.image.tag}</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>push-latest-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>docker.io/juanmanuelv/${app.image.name}:latest</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

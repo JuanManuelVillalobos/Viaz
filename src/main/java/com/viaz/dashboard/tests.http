@@ -12,9 +12,9 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
+  "username": "juanmavillalobosn@gmail.com",
+  "password": "juan2005"
 }
-
-
 
 ### Create Unvalidated User
 POST localhost:8080/api/auth/register
@@ -26,12 +26,23 @@ Content-Type: application/json
   "email": "juanmavillalobosn@gmail.com"
 }
 
+
+### Forgot Password
+POST localhost:8080/api/auth/forgot-password
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0MTY0NzA0MSwiZXhwIjoxNzQxNjQ3NjQxfQ.pwo0PzUK63keSs9WRNyqGEIO74v1B_J7YSqyDOk3lVtykEaD4i5LVDVZiFVK08r_O1FLEr4AgdCG4VeTqwMx5g
+Content-Type: text/plain
+
+juanmavillalobosn@gmail.com
+
+
 ### Register User With Password
 POST localhost:8080/api/auth/set-password?token=Ski8SnFd7aibqZyzveUq8Vn4xTvsLQWzwpHgMJS-pB4&email=juanmavillalobosn@gmail.com
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0MTIwMTExOCwiZXhwIjoxNzQxMjAxNzE4fQ.15OjNBr9GC9aDrDR1AA8x-wVL9LrKWTg6YUpFkaIXGds1pSuI0D1bXW4Dqf-gyj97jFlwx68tcGdLtxtUN7wlg
 Content-Type: text/plain
 
 password123
+
+
 
 ### Logout and invalidate JWT
 POST http://localhost:8080/api/auth/logout
@@ -44,7 +55,7 @@ POST localhost:8080/api/auth/refresh-token
 
 ### Get Shipments
 GET localhost:8080/api/shipment/get-all-shipments
-Authorization:
+#Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0MTM3MTcyOCwiZXhwIjoxNzQxMzcyMzI4fQ.Ns3PE0aq86a-Xodu3wzwThXyuFppM4BUgS2vceRe7kJGpxx0LMR9fx81QISdmGl27psV8AaDg1f8KO4lO3rA6Q
 
 ### Get Users
 GET localhost:8080/api/user/get-all-users
