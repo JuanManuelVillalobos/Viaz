@@ -9,5 +9,4 @@ public class ViazApplication {
     public static void main(String[] args) {
         SpringApplication.run(ViazApplication.class, args);
     }
-
 }
