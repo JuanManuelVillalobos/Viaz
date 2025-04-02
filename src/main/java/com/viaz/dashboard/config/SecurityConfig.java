@@ -43,7 +43,7 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(final HttpSecurity http, CorsConfigurationSource corsConfigurationSource)
+    public SecurityFilterChain securityFilterChain(final HttpSecurity http)
             throws Exception {
 
         return http
