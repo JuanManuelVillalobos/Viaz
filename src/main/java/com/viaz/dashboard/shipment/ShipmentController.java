@@ -16,6 +16,7 @@ public class ShipmentController {
         this.shipmentService = shipmentService;
     }
 
+
     @GetMapping("/get-all-shipments")
     public List<Shipment> getShipments() {
         return shipmentService.getShipments();
