@@ -1,6 +1,6 @@
 package com.viaz.dashboard.config;
 
-import com.viaz.dashboard.jwt.JwtFilter;
+import com.viaz.dashboard.filters.JwtFilter;
 import com.viaz.dashboard.filters.RateLimitingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,12 +31,12 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final JwtFilter jwtFilter;
-    private final RefreshTokenEntryPoint refreshTokenEntryPoint;
+    private final AuthEntryPoint authEntryPoint;
     private final RateLimitingFilter rateLimitingFilter;
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter jwtFilter, RefreshTokenEntryPoint refreshTokenEntryPoint, RateLimitingFilter rateLimitingFilter) {
+    public SecurityConfig(UserDetailsService userDetailsService, JwtFilter jwtFilter, AuthEntryPoint authEntryPoint, RateLimitingFilter rateLimitingFilter) {
         this.userDetailsService = userDetailsService;
-        this.refreshTokenEntryPoint = refreshTokenEntryPoint;
+        this.authEntryPoint = authEntryPoint;
         this.rateLimitingFilter = rateLimitingFilter;
         this.jwtFilter = jwtFilter;
     }
@@ -48,14 +48,18 @@ public class SecurityConfig {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .exceptionHandling(exceptionHandling ->
-                        exceptionHandling.authenticationEntryPoint(refreshTokenEntryPoint))
+                        exceptionHandling.authenticationEntryPoint(authEntryPoint))
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/auth/login",
+                                .requestMatchers("/api/shipment/upload-excel",
+                                        "/api/auth/login",
+                                        "/api/auth/forgot-password",
+                                        "/api/auth/set-password",
                                         "/api/auth/refresh-token").permitAll()
-                                .anyRequest().authenticated())
+                                .requestMatchers("/api/**").authenticated()
+                                .requestMatchers("/**").permitAll()
+                )
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
