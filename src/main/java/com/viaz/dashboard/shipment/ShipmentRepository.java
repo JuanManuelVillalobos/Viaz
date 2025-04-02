@@ -10,7 +10,7 @@ import java.util.List;
 public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     Shipment findByViazId(String viazId);
 
-    @Query("SELECT s FROM shipment s WHERE LOWER(s.shipmentStatus) != LOWER('egresado') ORDER BY s.viazId DESC")
+    @Query("SELECT s FROM shipment s WHERE LOWER(s.shipmentStatus) != LOWER('entregado') ORDER BY s.viazId DESC")
     List<Shipment> getPendingShipments();
 
     @Modifying
