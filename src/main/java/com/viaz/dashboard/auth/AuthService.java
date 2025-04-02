@@ -117,10 +117,4 @@ public class AuthService {
     public void forgotPassword(String email) throws MessagingException {
         emailService.sendPasswordResetEmail(email);
     }
-
-    // Helper method to check if the identifier is an email
-    private boolean isEmail(String identifier) {
-        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        return identifier.matches(emailRegex);
-    }
 }
