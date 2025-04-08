@@ -1,6 +1,13 @@
 #### SPRING
 spring:
-## DATABASE
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  codec:
+    max-in-memory-size: 10MB
+
+  ### DATABASE
   datasource:
     url: jdbc:postgresql://localhost:5432/student
     username:
@@ -9,26 +16,26 @@ spring:
     properties:
       hibernate:
         dialect:
-           org.hibernate.dialect.PostgreSQLDialect
+          org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
   ###
-
-### EMAIL SERVICE
+  ### EMAIL SERVICE
   mail:
     host: smtp.gmail.com
     port: 587
     username: viazdashboard@gmail.com
     password: ${MAIL_PASSWORD}
     properties:
-     mail:
-       smtp:
-         auth: true
-         starttls.enable: true
-###
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+  ###
 ####
+
 ### DEBUG LEVEL
 server:
   error:
@@ -36,8 +43,8 @@ server:
 logging:
   level:
     org.springframework.mail: debug
-###
-  
+  ###
+
 ### JWT SECRET KEY
 jwt:
   secret:
@@ -57,6 +64,18 @@ frontend:
   url: ${FRONTEND_URL}
 ###
 
+### RATE LIMIT
+rate:
+  limit:
+    pass: true
+    value: ${RATE_LIMIT}
+
+
+###
+
 ### AWS
 aws:
-  region: eu-east-1
+  region: US_EAST_1
+  s3:
+    mock: true
+###
