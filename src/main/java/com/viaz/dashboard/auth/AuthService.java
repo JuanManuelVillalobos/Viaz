@@ -12,6 +12,7 @@ import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,28 +53,39 @@ public class AuthService {
         String identifier = userService.getUsernameByEmail(viazUser.getEmail());
         String password = viazUser.getPassword();
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(identifier, password)
-        );
-
-        if (!authentication.isAuthenticated()) {
-            return null;
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(identifier, password)
+            );
+    
+            if (!authentication.isAuthenticated()) {
+                userService.incrementFailedLoginAttempts(identifier);
+                return null;
+            }
+    
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+            
+            // Record successful login to reset failed attempts and update last login date
+            userService.recordSuccessfulLogin(username);
+            
+            String accessToken = jwtUtil.generateAccessToken(username);
+            String refreshToken = jwtUtil.generateRefreshToken(username);
+    
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setPath("/api/");
+            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 Days
+    //        TODO Have https certificate
+    //        refreshTokenCookie.setSecure(true);
+            response.addCookie(refreshTokenCookie);
+    
+            return new Token(accessToken, username);
+        } catch (BadCredentialsException e) {
+            // Record failed login attempt
+            userService.incrementFailedLoginAttempts(identifier);
+            throw e;
         }
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-        String accessToken = jwtUtil.generateAccessToken(username);
-        String refreshToken = jwtUtil.generateRefreshToken(username);
-
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setPath("/api/");
-        refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 Days
-//        TODO Have https certificate
-//        refreshTokenCookie.setSecure(true);
-        response.addCookie(refreshTokenCookie);
-
-        return new Token(accessToken, username);
     }
 
     public void logout(String refreshToken) {
@@ -113,6 +125,7 @@ public class AuthService {
         throw new BadCredentialsException("Token is invalid"); // Token is invalid or does not match
     }
 
+    @Scheduled(cron = "0 0 0 * * *")
     public void deleteExpiredInvites() {
         userService.deleteUsersWithNullPassword();
     }
