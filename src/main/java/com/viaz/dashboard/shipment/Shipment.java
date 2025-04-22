@@ -1,6 +1,7 @@
 package com.viaz.dashboard.shipment;
 
 
+import com.viaz.dashboard.documents.Document;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -8,6 +9,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @ToString
 @Getter
@@ -15,7 +18,8 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "shipment")
+@Table(name = "shipments")
+@Entity
 @DynamicUpdate
 public class Shipment {
     @Id
@@ -64,6 +68,9 @@ public class Shipment {
     private LocalDate vacuumArrival;
     private String eir;
     private String observations;
+
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Document> documents = new ArrayList<>();
 
 
     @PrePersist
