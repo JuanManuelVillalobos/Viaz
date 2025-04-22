@@ -43,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+    ) throws IOException {
         try {
             Optional<String> tokenOpt = extractToken(request);
             if (tokenOpt.isEmpty()) {
