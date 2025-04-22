@@ -1,6 +1,7 @@
 package com.viaz.dashboard.auth;
 
 import com.viaz.dashboard.email.EmailService;
+import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
@@ -12,12 +13,14 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -74,22 +77,22 @@ public class AuthService {
     }
 
     public void logout(String refreshToken) {
-        Date expirationDate = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30); // 30days
+            LocalDateTime expirationDate = LocalDateTime.now().plusDays(30); // 30 days
         blacklistService.addToBlacklist(refreshToken, expirationDate);
     }
 
     public Token refreshAccessToken(String refreshToken, HttpServletResponse response) throws IOException {
         UserDetails userDetails = viazUserDetailsService.loadUserByUsername(jwtUtil.extractUsername(refreshToken));
         if (refreshToken.isEmpty()) {
-            return null;
+            throw new  ResourceNotFoundException("Refresh token is empty");
         }
         if (!jwtUtil.validateToken(refreshToken, userDetails)) {
-            return null;
+            throw new  BadCredentialsException("Invalid refresh token");
         }
         if (blacklistService.isBlacklisted(refreshToken)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("{\"error\": \"Revoked Token\"}");
-            return null;
+            throw new BadCredentialsException("Revoked Token");
         }
         String username = jwtUtil.extractUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);
@@ -107,7 +110,7 @@ public class AuthService {
             emailService.removeToken(email);
             return changedPasswordUser;
         }
-        return null; // Token is invalid or does not match
+        throw new BadCredentialsException("Token is invalid"); // Token is invalid or does not match
     }
 
     public void deleteExpiredInvites() {
