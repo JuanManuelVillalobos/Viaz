@@ -1,11 +1,14 @@
 package com.viaz.dashboard.shipment;
 
+import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.shipment.idGenerator.ShipmentIdGeneratorService;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,14 +42,17 @@ public class ShipmentService {
     }
 
 
+    @Cacheable(value = "shipments", key = "'allShipments'")
     public List<Shipment> getShipments() {
         return shipmentRepository.findAll(Sort.by("viazId").descending());
     }
 
+    @Cacheable(value = "shipments", key = "'pendingShipments'")
     public List<Shipment> getPendingShipments() {
         return shipmentRepository.getPendingShipments();
     }
 
+    @CacheEvict(value = "shipments", allEntries = true)
     public Shipment createShipment(Shipment shipment) {
         shipment.setViazId(shipmentIdGeneratorService.generateShipmentId());
         shipment.setYear(Year.now().getValue());
@@ -56,12 +62,13 @@ public class ShipmentService {
         return shipmentRepository.save(shipment);
     }
 
+    @CacheEvict(value = "shipments", allEntries = true)
     @Transactional
     public void deleteShipment(String viazId) {
         shipmentRepository.deleteByViazID(viazId);
     }
 
-
+    @CacheEvict(value = "shipments", allEntries = true)
     public Shipment updateShipment(String viazId, Map<String, Object> updates) {
         Shipment existingShipment = getShipmentById(viazId);
 
@@ -101,6 +108,7 @@ public class ShipmentService {
         }
     }
 
+    @CacheEvict(value = "shipments", allEntries = true)
     public ResponseEntity<String> uploadExcel(MultipartFile file) {
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -155,7 +163,11 @@ public class ShipmentService {
                                 // Convert all numbers to Strings, EXCEPT dates
                                 switch (cell.getCellType()) {
                                     case STRING:
-                                        field.set(shipment, capitalizeFirstLetter(cell.getStringCellValue()));
+                                        if ("viazId".equals(field.getName()) || "container".equals(field.getName())) {
+                                            field.set(shipment, cell.getStringCellValue().toUpperCase()); // Set to uppercase if field is viazId
+                                        } else {
+                                            field.set(shipment, capitalizeFirstLetter(cell.getStringCellValue()));
+                                        }
                                         break;
                                     case NUMERIC:
                                         field.set(shipment, String.valueOf((long) cell.getNumericCellValue()));
@@ -184,5 +196,20 @@ public class ShipmentService {
             return input;
         }
         return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
+    }
+
+    public void uploadFileToShipment(String viazId, MultipartFile file) {
+        checkIfShipmentExistsOrThrow(viazId);
+    }
+
+    private void checkIfShipmentExistsOrThrow(String viazId) {
+        if (!shipmentRepository.existsShipmentByViazId(viazId)) {
+            throw new ResourceNotFoundException(
+                    "shipment with id " + viazId + " does not exist");
+        }
+    }
+
+    public MultipartFile getFileFromShipment(String viazId, String filename) {
+        return null;
     }
 }

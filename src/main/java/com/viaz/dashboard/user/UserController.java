@@ -1,6 +1,8 @@
 package com.viaz.dashboard.user;
 
 import com.viaz.dashboard.user.helpers.ViazUserDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,14 +17,37 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Get all users using Data Transfer Object
     @GetMapping("/get-all-users")
-    public List<ViazUserDTO> getAllUsers() {
-        return userService.getAllUsers();
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<ViazUserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @DeleteMapping(path = "/delete-user/{userId}")
-    public void deleteUser(@PathVariable("userId") Long userId) {
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{userId}/unlock")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> unlockAccount(@PathVariable Long userId) {
+        userService.unlockAccount(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/roles/{roleName}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> assignRole(@PathVariable Long userId, @PathVariable String roleName) {
+        userService.assignRoleToUser(userId, roleName);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{userId}/roles/{roleName}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> removeRole(@PathVariable Long userId, @PathVariable String roleName) {
+        userService.removeRoleFromUser(userId, roleName);
+        return ResponseEntity.ok().build();
     }
 }

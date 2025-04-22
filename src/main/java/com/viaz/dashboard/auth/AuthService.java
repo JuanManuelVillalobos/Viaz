@@ -1,6 +1,7 @@
 package com.viaz.dashboard.auth;
 
 import com.viaz.dashboard.email.EmailService;
+import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
@@ -11,14 +12,16 @@ import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Service
 public class AuthService {
@@ -49,47 +52,58 @@ public class AuthService {
         String identifier = userService.getUsernameByEmail(viazUser.getEmail());
         String password = viazUser.getPassword();
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(identifier, password)
-        );
-
-        if (!authentication.isAuthenticated()) {
-            return null;
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(identifier, password)
+            );
+    
+            if (!authentication.isAuthenticated()) {
+                userService.incrementFailedLoginAttempts(identifier);
+                return null;
+            }
+    
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String username = userDetails.getUsername();
+            
+            // Record successful login to reset failed attempts and update last login date
+            userService.recordSuccessfulLogin(username);
+            
+            String accessToken = jwtUtil.generateAccessToken(username);
+            String refreshToken = jwtUtil.generateRefreshToken(username);
+    
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setPath("/api/");
+            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 Days
+    //        TODO Have https certificate
+    //        refreshTokenCookie.setSecure(true);
+            response.addCookie(refreshTokenCookie);
+    
+            return new Token(accessToken, username);
+        } catch (BadCredentialsException e) {
+            // Record failed login attempt
+            userService.incrementFailedLoginAttempts(identifier);
+            throw e;
         }
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-        String accessToken = jwtUtil.generateAccessToken(username);
-        String refreshToken = jwtUtil.generateRefreshToken(username);
-
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setPath("/api/");
-        refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 Days
-//        TODO Have https certificate
-//        refreshTokenCookie.setSecure(true);
-        response.addCookie(refreshTokenCookie);
-
-        return new Token(accessToken, username);
     }
 
     public void logout(String refreshToken) {
-        Date expirationDate = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30); // 30days
+            LocalDateTime expirationDate = LocalDateTime.now().plusDays(30); // 30 days
         blacklistService.addToBlacklist(refreshToken, expirationDate);
     }
 
     public Token refreshAccessToken(String refreshToken, HttpServletResponse response) throws IOException {
         UserDetails userDetails = viazUserDetailsService.loadUserByUsername(jwtUtil.extractUsername(refreshToken));
         if (refreshToken.isEmpty()) {
-            return null;
+            throw new  ResourceNotFoundException("Refresh token is empty");
         }
         if (!jwtUtil.validateToken(refreshToken, userDetails)) {
-            return null;
+            throw new  BadCredentialsException("Invalid refresh token");
         }
         if (blacklistService.isBlacklisted(refreshToken)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("{\"error\": \"Revoked Token\"}");
-            return null;
+            throw new BadCredentialsException("Revoked Token");
         }
         String username = jwtUtil.extractUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);
@@ -107,9 +121,10 @@ public class AuthService {
             emailService.removeToken(email);
             return changedPasswordUser;
         }
-        return null; // Token is invalid or does not match
+        throw new BadCredentialsException("Token is invalid"); // Token is invalid or does not match
     }
 
+    @Scheduled(cron = "0 0 0 * * *")
     public void deleteExpiredInvites() {
         userService.deleteUsersWithNullPassword();
     }

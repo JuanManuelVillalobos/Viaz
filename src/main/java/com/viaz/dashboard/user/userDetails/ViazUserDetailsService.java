@@ -19,7 +19,8 @@ public class ViazUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        ViazUser viazUser = userRepository.findByUsername(username);
+        ViazUser viazUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         if (viazUser == null) {
             throw new UsernameNotFoundException("User not found");
         }

@@ -6,20 +6,19 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Collectors;
 
-public class ViazUserDetails implements UserDetails {
-
-    private final ViazUser viazUser;
-
-    public ViazUserDetails(ViazUser viazUser) {
-        this.viazUser = viazUser;
-    }
+public record ViazUserDetails(ViazUser viazUser) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return viazUser.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
-        return Collections.singletonList(new SimpleGrantedAuthority("ADMIN"));
+        if (viazUser.getRoles() == null || viazUser.getRoles().isEmpty()) {
+            // Fallback to 'default' role if no roles assigned
+            return java.util.Collections.singletonList(new SimpleGrantedAuthority("USER"));
+        }
+        return viazUser.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -34,29 +33,31 @@ public class ViazUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-//        return UserDetails.super.isAccountNonExpired();
-        // TODO
-        return true;
+        return viazUser.isAccountNonExpired();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-//        return UserDetails.super.isAccountNonLocked();
-        // TODO
-        return true;
+        return viazUser.isAccountNonLocked();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-//        return UserDetails.super.isCredentialsNonExpired();
-        // TODO
-        return true;
+        return viazUser.isCredentialsNonExpired();
     }
 
     @Override
     public boolean isEnabled() {
-//        return UserDetails.super.isEnabled();
-        // TODO
-        return true;
+        return viazUser.isEnabled();
+    }
+
+    /**
+     * Get the underlying ViazUser entity
+     *
+     * @return the ViazUser
+     */
+    @Override
+    public ViazUser viazUser() {
+        return viazUser;
     }
 }

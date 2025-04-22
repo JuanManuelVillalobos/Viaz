@@ -28,6 +28,7 @@ public class JwtUtil {
 
     public String generateAccessToken(String username) {
         Map<String, Object> claims = new HashMap<>();
+            claims.put("type", "access");
         // 10 minutes
         long ACCESS_TOKEN_VALIDITY = 60 * 10;
         return createToken(claims, username, ACCESS_TOKEN_VALIDITY);
@@ -35,6 +36,7 @@ public class JwtUtil {
 
     public String generateRefreshToken(String username) {
         Map<String, Object> claims = new HashMap<>();
+            claims.put("type", "refresh");
         // 30 days
         long REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 30;
         return createToken(claims, username, REFRESH_TOKEN_VALIDITY);
