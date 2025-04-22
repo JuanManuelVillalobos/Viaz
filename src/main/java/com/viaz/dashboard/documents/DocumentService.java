@@ -8,7 +8,12 @@ import java.util.UUID;
 @Service
 public class DocumentService {
 
-    private DocumentRepository documentRepository;
+
+    private final DocumentRepository documentRepository;
+
+    public DocumentService(DocumentRepository documentRepository) {
+        this.documentRepository = documentRepository;
+    }
 
     public Document saveDocument(Document document) {
         return documentRepository.save(document);
