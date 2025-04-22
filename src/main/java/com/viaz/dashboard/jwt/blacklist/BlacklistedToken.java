@@ -1,10 +1,9 @@
 package com.viaz.dashboard.jwt.blacklist;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -14,20 +13,26 @@ import java.util.UUID;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "blacklisted_token")
+@Entity
+@Table(
+    name = "blacklisted_tokens",
+    indexes = {
+        @Index(name = "idx_token", columnList = "token"),
+        @Index(name = "idx_expiration_date", columnList = "expirationDate")
+    }
+)
 public class BlacklistedToken {
     @Id
-    private UUID id; // No @GeneratedValue annotation
+    private UUID id;
 
     private String token;
 
-    private Date expirationDate; // Use LocalDateTime instead of Date
+    private LocalDateTime expirationDate;
 
     // Constructor for creating a new BlacklistedToken
-    public BlacklistedToken(String token, Date expirationDate) {
-        this.id = UUID.randomUUID(); // Generate a new UUID
+    public BlacklistedToken(String token, LocalDateTime expirationDate) {
+        this.id = UUID.randomUUID();
         this.token = token;
         this.expirationDate = expirationDate;
     }
-
 }
