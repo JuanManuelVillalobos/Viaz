@@ -7,6 +7,14 @@ spring:
   codec:
     max-in-memory-size: 10MB
 
+
+  ### CACHE
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=60m
+  ###
+
   ### DATABASE
   datasource:
     url: jdbc:postgresql://localhost:5432/student
@@ -19,7 +27,7 @@ spring:
           org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
   ###
   ### EMAIL SERVICE
@@ -38,6 +46,12 @@ spring:
 
 ### DEBUG LEVEL
 server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
+#   TODO check if url is secure, otherwise the cookie will not be sent
   error:
     include-message: always
 logging:
@@ -67,8 +81,9 @@ frontend:
 ### RATE LIMIT
 rate:
   limit:
-    pass: true
-    value: ${RATE_LIMIT}
+    pass: false
+    capacity: ${RATE_LIMIT}
+    time: 1
 
 
 ###
