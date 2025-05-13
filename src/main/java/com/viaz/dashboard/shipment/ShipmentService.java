@@ -1,6 +1,7 @@
 package com.viaz.dashboard.shipment;
 
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
+import com.viaz.dashboard.s3.S3Service;
 import com.viaz.dashboard.shipment.idGenerator.ShipmentIdGeneratorService;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -30,10 +32,12 @@ public class ShipmentService {
     private static final Logger log = LoggerFactory.getLogger(ShipmentService.class);
     private final ShipmentRepository shipmentRepository;
     private final ShipmentIdGeneratorService shipmentIdGeneratorService;
+    private final S3Service s3Service;
 
-    public ShipmentService(ShipmentRepository shipmentRepository, ShipmentIdGeneratorService shipmentIdGeneratorService) {
+    public ShipmentService(ShipmentRepository shipmentRepository, ShipmentIdGeneratorService shipmentIdGeneratorService, S3Service s3Service) {
         this.shipmentRepository = shipmentRepository;
         this.shipmentIdGeneratorService = shipmentIdGeneratorService;
+        this.s3Service = s3Service;
     }
 
 
@@ -198,8 +202,18 @@ public class ShipmentService {
         return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
     }
 
-    public void uploadFileToShipment(String viazId, MultipartFile file) {
+    public PutObjectResponse uploadFileToShipment(String viazId, MultipartFile file) throws IOException {
         checkIfShipmentExistsOrThrow(viazId);
+        String filename = file.getOriginalFilename();
+        if (filename == null) {
+            throw new IllegalArgumentException("Filename cannot be null");
+        }
+        String objectKey = viazId + "/" + filename;
+        byte[] fileBytes = file.getBytes();
+        if (fileBytes.length == 0) {
+            throw new IllegalArgumentException("File cannot be empty");
+        }
+        return s3Service.putObject(objectKey, fileBytes);
     }
 
     private void checkIfShipmentExistsOrThrow(String viazId) {
@@ -211,5 +225,9 @@ public class ShipmentService {
 
     public MultipartFile getFileFromShipment(String viazId, String filename) {
         return null;
+    }
+
+    public String getUploadUrl() {
+        return s3Service.getUploadUrl();
     }
 }
