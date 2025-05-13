@@ -34,6 +34,8 @@ server:
   error:
     include-message: always
 logging:
+  threshold:
+    console: warn
   level:
     org.springframework.mail: debug
 ###
@@ -59,10 +61,17 @@ frontend:
 
 ### RATE LIMIT
 rate:
-  limit: ${RATE_LIMIT}
+  limit:
+    pass: false
+    capacity: ${RATE_LIMIT}
+    time: 1
 ###
 
 ### AWS
 aws:
   region: ${AWS_REGION}
+  bucket:
+    main: S3Bucket
+  s3:
+    mock: dasas
 ###
