@@ -25,6 +25,12 @@ import java.util.Set;
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
 public class ViazUser {
+    
+    public enum UserStatus {
+        ACTIVE,
+        PENDING
+    }
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -49,6 +55,10 @@ public class ViazUser {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.PENDING;
 
     @Column(name = "account_non_expired")
     private boolean accountNonExpired = true;
@@ -85,7 +95,7 @@ public class ViazUser {
         this.email = email;
         this.createdDate = LocalDateTime.now();
     }
-
+    
     public ViazUser(String username, String email) {
         this.username = username;
         this.email = email;
@@ -106,10 +116,28 @@ public class ViazUser {
     public void recordSuccessfulLogin() {
         this.lastLoginDate = LocalDateTime.now();
         resetFailedLoginAttempts();
+        this.status = UserStatus.ACTIVE;
     }
     
     public void recordPasswordChange() {
         this.passwordChangedDate = LocalDateTime.now();
         this.credentialsNonExpired = true;
+    }
+    
+    public void setInactive() {
+        this.enabled = false;
+    }
+    
+    public void activate() {
+        this.status = UserStatus.ACTIVE;
+        this.enabled = true;
+        this.accountNonLocked = true;
+        this.accountNonExpired = true;
+        this.credentialsNonExpired = true;
+    }
+    
+    public void activateAccount() {
+        this.status = UserStatus.ACTIVE;
+        this.enabled = true;
     }
 }
