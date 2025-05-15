@@ -2,6 +2,7 @@ package com.viaz.dashboard.s3;
 
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -41,7 +42,7 @@ public class S3Service {
         return response;
     }
 
-
+    @Cacheable(value = "s3Objects", key = "{#prefix}")
     public List<String> listObjects(String prefix) { // Add prefix parameter
         ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
                 .bucket(bucketName)
@@ -56,11 +57,14 @@ public class S3Service {
     }
 
 
+    @Cacheable(value = "s3DownloadUrls", key = "{#key}")
     public String getDownloadUrl(String key) { // Add a parameter for the key
         try {
+            String contentType = determineContentType(key);
             GetObjectRequest objectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
+                    .responseContentType(contentType)
                     .build();
 
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
@@ -79,5 +83,27 @@ public class S3Service {
     @PreDestroy
     public void close() {
         s3Presigner.close();
+    }
+
+    private String determineContentType(String objectKey) {
+        String lcKey = objectKey.toLowerCase();
+        if (lcKey.endsWith(".pdf")) {
+            return "application/pdf";
+        } else if (lcKey.endsWith(".png")) {
+            return "image/png";
+        } else if (lcKey.endsWith(".jpg") || lcKey.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (lcKey.endsWith(".gif")) {
+            return "image/gif";
+        } else if (lcKey.endsWith(".txt")) {
+            return "text/plain";
+        } else if (lcKey.endsWith(".html") || lcKey.endsWith(".htm")) {
+            return "text/html";
+        } else if (lcKey.endsWith(".json")) {
+            return "application/json";
+        } else {
+            // Fallback to binary stream
+            return "application/octet-stream";
+        }
     }
 }
