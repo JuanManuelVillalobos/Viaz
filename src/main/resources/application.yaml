@@ -17,7 +17,7 @@ spring:
 
   ### DATABASE
   datasource:
-    url: jdbc:postgresql://localhost:5432/student
+    url: jdbc:postgresql://localhost:5432/viaz
     username:
     password:
   jpa:
@@ -84,13 +84,13 @@ rate:
     pass: false
     capacity: ${RATE_LIMIT}
     time: 1
-
-
 ###
 
 ### AWS
 aws:
-  region: US_EAST_1
+  region: ${AWS_REGION}
+  bucket:
+    main: viazdocuments
   s3:
-    mock: true
+    mock: false
 ###

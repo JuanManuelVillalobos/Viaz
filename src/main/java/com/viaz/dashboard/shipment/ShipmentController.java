@@ -1,23 +1,22 @@
 package com.viaz.dashboard.shipment;
 
-import com.viaz.dashboard.s3.S3Service;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 
+import java.io.IOException;
 import java.util.*;
 
 @RestController
 @RequestMapping(path = "api/shipment")
 public class ShipmentController {
     private final ShipmentService shipmentService;
-    private final S3Service s3Service;
 
-    public ShipmentController(ShipmentService shipmentService, S3Service s3Service) {
+    public ShipmentController(ShipmentService shipmentService) {
         this.shipmentService = shipmentService;
-        this.s3Service = s3Service;
     }
 
 
@@ -58,13 +57,28 @@ public class ShipmentController {
         return shipmentService.uploadExcel(file);
     }
 
-    @PostMapping(value = "/{viazId}/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void uploadFileToShipment(@PathVariable String viazId, @RequestParam("file") MultipartFile file) {
-        shipmentService.uploadFileToShipment(viazId,file);
+    @PostMapping(value = "/get-upload-url")
+    public ResponseEntity<String> getUploadUrl() {
+//        TODO
+        return null;
     }
 
-    @GetMapping("/{viazId}/download-file/{filename}")
-    public MultipartFile getFilsFromShipment(@PathVariable String viazId, @PathVariable String filename) {
-        return shipmentService.getFileFromShipment(viazId,filename);
+    @PostMapping(value = "/{viazId}/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadFileToShipment(@PathVariable String viazId, @RequestParam("file") MultipartFile file) throws IOException {
+        PutObjectResponse s3response = shipmentService.uploadFileToShipment(viazId,file);
+        System.out.println(s3response.eTag());
+        return ResponseEntity.ok("File uploaded successfully");
+    }
+
+
+//    TODO get presigned dowload url
+    @GetMapping("/download-file/{viazId}/{objectKey}")
+    public String getFilesFromShipment(@PathVariable String viazId,@PathVariable String objectKey) {
+        return shipmentService.getFileFromShipment(viazId, objectKey);
+    }
+
+    @GetMapping(value = "/{viazId}/list-objects")
+    public List<String> getDocuments(@PathVariable String viazId) {
+        return shipmentService.getDocuments(viazId);
     }
 }

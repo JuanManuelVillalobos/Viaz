@@ -21,8 +21,6 @@ public class Document {
     private UUID documentId;
 
     private String fileName;
-    private String fileType;
-    private byte[] data; // Store the document as a byte array
 
     @ManyToOne
     @JoinColumn(name = "shipment_id")
