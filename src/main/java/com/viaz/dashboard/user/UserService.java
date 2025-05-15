@@ -54,7 +54,20 @@ public class UserService {
         if (user == null) {
             return null;
         }
-        return new ViazUserDTO(user.getUserId(), user.getUsername(), user.getEmail());
+            
+            // Convert roles to set of role names
+            Set<String> roleNames = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+                
+            return new ViazUserDTO(
+                user.getUserId(), 
+                user.getUsername(), 
+                user.getEmail(),
+                user.getLastLoginDate(),
+                user.getStatus(),
+                roleNames
+            );
     }
 
     public List<ViazUserDTO> getAllUsers() {
@@ -81,23 +94,23 @@ public class UserService {
 
         return convertToDTO(user);
     }
-    
+
     private boolean isPasswordValid(String password) {
         // Check for minimum length
         if (password.length() < 8) return false;
-        
+
         // Check for at least one uppercase letter
         if (!password.matches(".*[A-Z].*")) return false;
-        
+
         // Check for at least one lowercase letter
         if (!password.matches(".*[a-z].*")) return false;
-        
+
         // Check for at least one digit
         if (!password.matches(".*\\d.*")) return false;
-        
+
         // Check for at least one special character
         if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) return false;
-        
+
         return true;
     }
 
@@ -118,6 +131,7 @@ public class UserService {
         
         return userRepository.save(user);
     }
+
 
     public void deleteUsersWithNullPassword() {
         List<ViazUser> usersWithNullPassword = userRepository.findByPasswordIsNull();
