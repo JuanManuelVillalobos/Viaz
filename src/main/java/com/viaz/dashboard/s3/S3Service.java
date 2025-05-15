@@ -1,20 +1,18 @@
 package com.viaz.dashboard.s3;
 
-import java.time.Duration;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class S3Service {
@@ -43,34 +41,34 @@ public class S3Service {
         return response;
     }
 
-    public byte[] getObject(String key) {
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+
+    public List<String> listObjects(String prefix) { // Add prefix parameter
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
                 .bucket(bucketName)
-                .key(key)
+                .prefix(prefix) // Set the prefix
                 .build();
 
-        ResponseInputStream<GetObjectResponse> res = s3.getObject(getObjectRequest);
+        ListObjectsV2Response result = s3.listObjectsV2(listObjectsV2Request);
 
-        try {
-            return res.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return result.contents().stream()
+                .map(S3Object::key)
+                .collect(Collectors.toList());
     }
 
-    public String getUploadUrl(String key) { // Add a parameter for the key
+
+    public String getDownloadUrl(String key) { // Add a parameter for the key
         try {
-            PutObjectRequest objectRequest = PutObjectRequest.builder()
+            GetObjectRequest objectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
                     .build();
 
-            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
                     .signatureDuration(Duration.ofMinutes(10)) // Set the expiration time (e.g., 10 minutes)
-                    .putObjectRequest(objectRequest)
+                    .getObjectRequest(objectRequest)
                     .build();
 
-            PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+            PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
 
             return presignedRequest.url().toString();
         } catch (Exception e) {
@@ -78,7 +76,7 @@ public class S3Service {
         }
     }
 
-    // Remember to close the S3Presigner when your application shuts down
+    @PreDestroy
     public void close() {
         s3Presigner.close();
     }
