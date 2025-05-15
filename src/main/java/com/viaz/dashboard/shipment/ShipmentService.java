@@ -223,11 +223,13 @@ public class ShipmentService {
         }
     }
 
-    public MultipartFile getFileFromShipment(String viazId, String filename) {
-        return null;
+    public List<String> getDocuments(String viazId) {
+        return s3Service.listObjects(viazId);
     }
 
-    public String getUploadUrl() {
-        return s3Service.getUploadUrl();
+    public String getFileFromShipment(String viazId, String objectKey) {
+        System.out.println("TEST TEST HERE IS GETFILEFROMSHIPMENT");
+        String key = viazId + "/" + objectKey;
+        return s3Service.getDownloadUrl(key);
     }
 }
