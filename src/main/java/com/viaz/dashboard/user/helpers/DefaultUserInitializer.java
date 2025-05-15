@@ -35,11 +35,13 @@ public class DefaultUserInitializer implements CommandLineRunner {
         if (userRepository.findByUsername(defaultAdminUsername).isEmpty()) {
             // Create admin role if it doesn't exist
             Role adminRole = roleRepository.findByName("ADMIN")
-                    .orElseGet(() -> roleRepository.save(new Role("ADMIN")));
+                    .orElseGet(() -> roleRepository.save(new Role("ADMIN", "Administrator user")));
 
             // Create a new admin user if it does not exist
             ViazUser defaultViazUser = new ViazUser(defaultAdminUsername, defaultAdminPassword, defaultEmail);
             defaultViazUser.setRoles(Set.of(adminRole)); // Use the saved role instance
+            defaultViazUser.setEnabled(true);
+            defaultViazUser.recordSuccessfulLogin();
 
 
             userService.addUserToRepository(defaultViazUser);

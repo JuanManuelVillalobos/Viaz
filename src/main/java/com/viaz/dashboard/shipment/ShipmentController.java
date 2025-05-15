@@ -66,8 +66,7 @@ public class ShipmentController {
     @PostMapping(value = "/{viazId}/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFileToShipment(@PathVariable String viazId, @RequestParam("file") MultipartFile file) throws IOException {
         PutObjectResponse s3response = shipmentService.uploadFileToShipment(viazId,file);
-        System.out.println(s3response.eTag());
-        return ResponseEntity.ok("File uploaded successfully");
+        return ResponseEntity.ok("File uploaded successfully" + s3response);
     }
 
 

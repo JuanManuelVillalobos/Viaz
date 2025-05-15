@@ -35,4 +35,6 @@ public interface UserRepository extends JpaRepository<ViazUser, Long> {
     @Modifying
     @Query("UPDATE ViazUser u SET u.enabled = false WHERE u.lastLoginDate < :date")
     void disableInactiveUsersSince(LocalDateTime date);
+    
+    List<ViazUser> findByStatus(ViazUser.UserStatus status);
 }
