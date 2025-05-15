@@ -92,5 +92,5 @@ aws:
   bucket:
     main: viazdocuments
   s3:
-    mock: true
+    mock: false
 ###
