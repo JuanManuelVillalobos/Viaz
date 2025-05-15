@@ -168,7 +168,7 @@ public class ShipmentService {
                                 switch (cell.getCellType()) {
                                     case STRING:
                                         if ("viazId".equals(field.getName()) || "container".equals(field.getName())) {
-                                            field.set(shipment, cell.getStringCellValue().toUpperCase()); // Set to uppercase if field is viazId
+                                            field.set(shipment, cell.getStringCellValue().toUpperCase());
                                         } else {
                                             field.set(shipment, capitalizeFirstLetter(cell.getStringCellValue()));
                                         }
@@ -182,7 +182,7 @@ public class ShipmentService {
                             }
                         }
                     } catch (IllegalAccessException | DateTimeParseException e) {
-                        log.error("Error setting field: " + field.getName() + " - " + e.getMessage());
+                        log.error("Error setting field: {} - {}", field.getName(), e.getMessage());
                     }
                 }
 
@@ -228,7 +228,6 @@ public class ShipmentService {
     }
 
     public String getFileFromShipment(String viazId, String objectKey) {
-        System.out.println("TEST TEST HERE IS GETFILEFROMSHIPMENT");
         String key = viazId + "/" + objectKey;
         return s3Service.getDownloadUrl(key);
     }
