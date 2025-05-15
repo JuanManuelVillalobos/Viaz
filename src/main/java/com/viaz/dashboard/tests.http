@@ -3,7 +3,7 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "admin",
+  "email": "admin@example.com",
   "password": "password"
 }
 
@@ -81,3 +81,13 @@ Authorization:
 POST http://localhost:8080/api/shipment/create-shipment
 Authorization:
 Content-Type: application/json
+
+
+### Get list of documents
+GET http://localhost:8080/api/shipment/VZ-2025-001/list-objects
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NDcyNTk2OTcsImV4cCI6MTc0NzI2MDI5N30.UdlawDsYzofhopum_BtqlvB8aosLRlQsvKWdUiDlB9Zb61fiepLTO1gXQIrVEZ2HwGxwqCKCLCq_KP3H_s9yyg
+
+
+### Get document URL
+GET http://localhost:8080/api/shipment/download-file/VZ-2024-012/lobster.jpg
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NDcyNjAzNTksImV4cCI6MTc0NzI2MDk1OX0.pCvTIUhZ-ru9qXAGyXYDwGvpP2iPZeseX_UKUkxaobqNi33juhqqkV0cfHRMLvbCjZjSKiidOvuPyefY5IM0bw
