@@ -69,10 +69,6 @@ public class Shipment {
     private String eir;
     private String observations;
 
-    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Document> documents = new ArrayList<>();
-
-
     @PrePersist
     public void generateId() {
         if (viazId == null) {
