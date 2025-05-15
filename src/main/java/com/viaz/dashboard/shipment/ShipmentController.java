@@ -1,6 +1,5 @@
 package com.viaz.dashboard.shipment;
 
-import com.viaz.dashboard.s3.S3Service;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +59,8 @@ public class ShipmentController {
 
     @PostMapping(value = "/get-upload-url")
     public ResponseEntity<String> getUploadUrl() {
-        return ResponseEntity.ok(shipmentService.getUploadUrl());
+//        TODO
+        return null;
     }
 
     @PostMapping(value = "/{viazId}/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -70,8 +70,15 @@ public class ShipmentController {
         return ResponseEntity.ok("File uploaded successfully");
     }
 
-    @GetMapping("/{viazId}/download-file/{filename}")
-    public MultipartFile getFilsFromShipment(@PathVariable String viazId, @PathVariable String filename) {
-        return shipmentService.getFileFromShipment(viazId,filename);
+
+//    TODO get presigned dowload url
+    @GetMapping("/download-file/{viazId}/{objectKey}")
+    public String getFilesFromShipment(@PathVariable String viazId,@PathVariable String objectKey) {
+        return shipmentService.getFileFromShipment(viazId, objectKey);
+    }
+
+    @GetMapping(value = "/{viazId}/list-objects")
+    public List<String> getDocuments(@PathVariable String viazId) {
+        return shipmentService.getDocuments(viazId);
     }
 }
