@@ -8,10 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,7 +74,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public ViazUserDTO changePassword(String viazUserEmail, String newPassword) throws Exception {
+    public ViazUserDTO changePassword(String viazUserEmail, String newPassword) {
         ViazUser user = userRepository.findByEmail(viazUserEmail)
             .orElseThrow(() -> new ResourceNotFoundException("No user with email " + viazUserEmail));
             
@@ -109,9 +107,7 @@ public class UserService {
         if (!password.matches(".*\\d.*")) return false;
 
         // Check for at least one special character
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) return false;
-
-        return true;
+        return password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
     }
 
     public ViazUser createUnValidatedUser(ViazUser user) {
@@ -194,7 +190,7 @@ public class UserService {
     
     @Scheduled(cron = "0 0 0 * * *") // Run daily at midnight
     public void checkAndExpireStalePasswords() {
-        LocalDateTime expiryDate = LocalDateTime.now().minus(PASSWORD_EXPIRY_DAYS, ChronoUnit.DAYS);
+        LocalDateTime expiryDate = LocalDateTime.now().minusDays(PASSWORD_EXPIRY_DAYS);
         List<ViazUser> usersWithStalePasswords = userRepository.findUsersWithPasswordOlderThan(expiryDate);
         
         usersWithStalePasswords.forEach(user -> {
@@ -205,7 +201,7 @@ public class UserService {
     
     @Scheduled(cron = "0 0 0 * * 0") // Run weekly on Sunday at midnight
     public void disableInactiveAccounts() {
-        LocalDateTime inactiveDate = LocalDateTime.now().minus(ACCOUNT_INACTIVE_DAYS, ChronoUnit.DAYS);
+        LocalDateTime inactiveDate = LocalDateTime.now().minusDays(ACCOUNT_INACTIVE_DAYS);
         userRepository.disableInactiveUsersSince(inactiveDate);
     }
 }
