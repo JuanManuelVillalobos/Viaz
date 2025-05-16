@@ -44,7 +44,7 @@ public class AuthService {
 
     public ViazUser register(ViazUserDTO viazUser) throws MessagingException {
         emailService.sendInvitationEmail(viazUser.email());
-        ViazUser user = new ViazUser(viazUser.username(), viazUser.email(), viazUser.);
+        ViazUser user = new ViazUser(viazUser.username(), viazUser.email());
         return userService.createUnValidatedUser(user);
     }
 
