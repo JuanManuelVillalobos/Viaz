@@ -27,7 +27,7 @@ spring:
           org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
   ###
   ### EMAIL SERVICE
@@ -54,6 +54,8 @@ server:
 #   TODO check if url is secure, otherwise the cookie will not be sent
   error:
     include-message: always
+#    UNCOMMENT ADDRESS WHEN WANTING TO EXPOSE TO LAN
+#  address: 0.0.0.0
 logging:
   level:
     org.springframework.mail: debug
