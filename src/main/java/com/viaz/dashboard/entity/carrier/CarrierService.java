@@ -23,4 +23,8 @@ public class CarrierService {
     public List<Carrier> getCarriers() {
         return carrierRepository.findAll();
     }
+
+    public Carrier getCarrierById(Long id) {
+        return carrierRepository.getReferenceById(id);
+    }
 }
