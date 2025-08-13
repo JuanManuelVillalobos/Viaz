@@ -1,5 +1,6 @@
 package com.viaz.dashboard.entity.shipment;
 
+import com.viaz.dashboard.entity.carrier.CarrierService;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.s3.S3Service;
 import com.viaz.dashboard.entity.shipment.idGenerator.ShipmentIdGeneratorService;
@@ -34,11 +35,13 @@ public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final ShipmentIdGeneratorService shipmentIdGeneratorService;
     private final S3Service s3Service;
+    private final CarrierService carrierService;
 
-    public ShipmentService(ShipmentRepository shipmentRepository, ShipmentIdGeneratorService shipmentIdGeneratorService, S3Service s3Service) {
+    public ShipmentService(ShipmentRepository shipmentRepository, ShipmentIdGeneratorService shipmentIdGeneratorService, S3Service s3Service, CarrierService carrierService) {
         this.shipmentRepository = shipmentRepository;
         this.shipmentIdGeneratorService = shipmentIdGeneratorService;
         this.s3Service = s3Service;
+        this.carrierService = carrierService;
     }
 
 
@@ -59,11 +62,11 @@ public class ShipmentService {
 
     @CacheEvict(value = "shipments", allEntries = true)
     public Shipment createShipment(Shipment shipment) {
+        System.out.println(shipment);
         shipment.setViazId(shipmentIdGeneratorService.generateShipmentId());
         shipment.setYear(Year.now().getValue());
         shipment.setSequence(extractSequenceFromId(shipment.getViazId()));
-
-        // Save the entity
+        shipment.setTransport(carrierService.getCarrierById(1L));
         return shipmentRepository.save(shipment);
     }
 
