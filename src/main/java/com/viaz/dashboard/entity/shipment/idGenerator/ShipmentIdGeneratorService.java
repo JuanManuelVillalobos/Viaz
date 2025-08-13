@@ -1,6 +1,6 @@
-package com.viaz.dashboard.shipment.idGenerator;
+package com.viaz.dashboard.entity.shipment.idGenerator;
 
-import com.viaz.dashboard.shipment.ShipmentRepository;
+import com.viaz.dashboard.entity.shipment.ShipmentRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Year;
