@@ -1,8 +1,8 @@
-package com.viaz.dashboard.shipment;
+package com.viaz.dashboard.entity.shipment;
 
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.s3.S3Service;
-import com.viaz.dashboard.shipment.idGenerator.ShipmentIdGeneratorService;
+import com.viaz.dashboard.entity.shipment.idGenerator.ShipmentIdGeneratorService;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class ShipmentService {
@@ -80,7 +81,37 @@ public class ShipmentService {
             try {
                 Field field = Shipment.class.getDeclaredField(key);
                 field.setAccessible(true);
-                field.set(existingShipment, value);
+
+                if (value != null) {
+                    if (field.getType() == LocalDateTime.class) {
+                        if (value instanceof String) {
+                            try {
+                                LocalDateTime dateTime = LocalDateTime.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                                field.set(existingShipment, dateTime);
+                            } catch (DateTimeParseException e) {
+                                log.error("Error parsing LocalDateTime for field {}: {}", key, e.getMessage());
+                            }
+                        } else {
+                            log.warn("Value for field {} is not a String, cannot parse as LocalDateTime.", key);
+                        }
+                    } else if (field.getType() == LocalDate.class) {
+                         if (value instanceof String) {
+                            try {
+                                LocalDate date = LocalDate.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE);
+                                field.set(existingShipment, date);
+                            } catch (DateTimeParseException e) {
+                                log.error("Error parsing LocalDate for field {}: {}", key, e.getMessage());
+                            }
+                        } else {
+                            log.warn("Value for field {} is not a String, cannot parse as LocalDate.", key);
+                        }
+                    }
+                    else {
+                        field.set(existingShipment, value);
+                    }
+                } else {
+                    field.set(existingShipment, null);
+                }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 log.error(e.getMessage());
             }
@@ -213,6 +244,7 @@ public class ShipmentService {
         if (fileBytes.length == 0) {
             throw new IllegalArgumentException("File cannot be empty");
         }
+        incrementFiles(viazId);
         return s3Service.putObject(objectKey, fileBytes);
     }
 
@@ -230,5 +262,34 @@ public class ShipmentService {
     public String getFileFromShipment(String viazId, String objectKey) {
         String key = viazId + "/" + objectKey;
         return s3Service.getDownloadUrl(key);
+    }
+
+    public ResponseEntity<String> deleteObject(String viazId, String objectKey) {
+        String key = viazId + "/" + objectKey;
+        s3Service.deleteObject(key);
+        decrementFiles(viazId);
+        return ResponseEntity.ok("Object deleted correctly: " + key);
+    }
+
+    public void incrementFiles(String viazId) {
+        Optional<Shipment> optionalShipment = Optional.ofNullable(shipmentRepository.findByViazId(viazId));
+        if (optionalShipment.isPresent()) {
+            Shipment shipment = optionalShipment.get();
+            shipment.incrementNumberOfFiles();
+            shipmentRepository.save(shipment);
+        } else {
+            throw new RuntimeException("Shipment not found");
+        }
+    }
+
+    public void decrementFiles(String viazId) {
+        Optional<Shipment> optionalShipment = Optional.ofNullable(shipmentRepository.findByViazId(viazId));
+        if (optionalShipment.isPresent()) {
+            Shipment shipment = optionalShipment.get();
+            shipment.decrementNumberOfFiles();
+            shipmentRepository.save(shipment);
+        } else {
+            throw new RuntimeException("Shipment not found");
+        }
     }
 }
