@@ -5,10 +5,10 @@ import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
-import com.viaz.dashboard.user.UserService;
-import com.viaz.dashboard.user.ViazUser;
-import com.viaz.dashboard.user.helpers.ViazUserDTO;
-import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
+import com.viaz.dashboard.entity.user.UserService;
+import com.viaz.dashboard.entity.user.ViazUser;
+import com.viaz.dashboard.entity.user.helpers.ViazUserDTO;
+import com.viaz.dashboard.entity.user.userDetails.ViazUserDetailsService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,9 +43,10 @@ public class AuthService {
     }
 
     public ViazUser register(ViazUserDTO viazUser) throws MessagingException {
-        emailService.sendInvitationEmail(viazUser.email());
         ViazUser user = new ViazUser(viazUser.username(), viazUser.email());
-        return userService.createUnValidatedUser(user);
+        user = userService.createUnValidatedUser(user);
+        emailService.sendInvitationEmail(viazUser.email());
+        return user;
     }
 
     public Token login(ViazUser viazUser, HttpServletResponse response) {
