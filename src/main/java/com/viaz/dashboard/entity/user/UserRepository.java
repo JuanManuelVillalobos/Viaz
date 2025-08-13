@@ -1,14 +1,16 @@
-package com.viaz.dashboard.user;
+package com.viaz.dashboard.entity.user;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 @Transactional
 public interface UserRepository extends JpaRepository<ViazUser, Long> {
     Optional<ViazUser> findByUsername(String username);
@@ -18,6 +20,7 @@ public interface UserRepository extends JpaRepository<ViazUser, Long> {
     Optional<ViazUser> findByEmail(String email);
 
     void deleteByUserId(Long userId);
+
     
     @Query("SELECT u FROM ViazUser u WHERE u.lastLoginDate < :date")
     List<ViazUser> findInactiveUsersSince(LocalDateTime date);
