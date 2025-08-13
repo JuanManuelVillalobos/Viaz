@@ -1,4 +1,4 @@
-package com.viaz.dashboard.user;
+package com.viaz.dashboard.entity.role;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,12 +14,15 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "role_id")
+    private Long roleId;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
-    
+
+    @Column(name = "description")
     private String description;
+
 
     public Role(String name) {
         this.name = name;
