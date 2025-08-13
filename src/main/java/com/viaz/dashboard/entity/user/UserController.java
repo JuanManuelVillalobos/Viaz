@@ -1,6 +1,6 @@
-package com.viaz.dashboard.user;
+package com.viaz.dashboard.entity.user;
 
-import com.viaz.dashboard.user.helpers.ViazUserDTO;
+import com.viaz.dashboard.entity.user.helpers.ViazUserDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/delete-user/{userId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
