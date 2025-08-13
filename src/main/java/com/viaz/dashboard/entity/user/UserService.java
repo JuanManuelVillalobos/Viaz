@@ -1,7 +1,9 @@
-package com.viaz.dashboard.user;
+package com.viaz.dashboard.entity.user;
 
+import com.viaz.dashboard.entity.role.Role;
+import com.viaz.dashboard.entity.role.RoleRepository;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
-import com.viaz.dashboard.user.helpers.ViazUserDTO;
+import com.viaz.dashboard.entity.user.helpers.ViazUserDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
