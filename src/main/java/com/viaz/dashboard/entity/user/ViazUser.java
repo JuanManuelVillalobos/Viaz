@@ -1,10 +1,12 @@
-package com.viaz.dashboard.user;
+package com.viaz.dashboard.entity.user;
 
+import com.viaz.dashboard.entity.role.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.checkerframework.checker.units.qual.C;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -33,6 +35,7 @@ public class ViazUser {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
     @NotBlank(message = "Username is required")
@@ -56,7 +59,7 @@ public class ViazUser {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @Column(name = "status")
+    @Column(name = "user_status")
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.PENDING;
 
