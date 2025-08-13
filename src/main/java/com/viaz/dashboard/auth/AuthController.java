@@ -20,6 +20,11 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
+    }
+
     // Register User
     @PostMapping("/register")
     public ViazUser registerUser(@RequestBody ViazUserDTO viazUser) throws MessagingException {
