@@ -1,5 +1,6 @@
-package com.viaz.dashboard.shipment;
+package com.viaz.dashboard.entity.shipment;
 
+import com.viaz.dashboard.entity.rating.RatingService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +15,11 @@ import java.util.*;
 @RequestMapping(path = "api/shipment")
 public class ShipmentController {
     private final ShipmentService shipmentService;
+    private final RatingService ratingService;
 
-    public ShipmentController(ShipmentService shipmentService) {
+    public ShipmentController(ShipmentService shipmentService, RatingService ratingService) {
         this.shipmentService = shipmentService;
+        this.ratingService = ratingService;
     }
 
 
@@ -70,7 +73,6 @@ public class ShipmentController {
     }
 
 
-//    TODO get presigned dowload url
     @GetMapping("/download-file/{viazId}/{objectKey}")
     public String getFilesFromShipment(@PathVariable String viazId,@PathVariable String objectKey) {
         return shipmentService.getFileFromShipment(viazId, objectKey);
@@ -80,4 +82,14 @@ public class ShipmentController {
     public List<String> getDocuments(@PathVariable String viazId) {
         return shipmentService.getDocuments(viazId);
     }
+
+    @DeleteMapping(value = "/delete-object/{viazId}/{objectKey}")
+    public ResponseEntity<String> deleteObject(@PathVariable String viazId,@PathVariable String objectKey) {
+        return shipmentService.deleteObject(viazId, objectKey);
+    }
+
+//    @PostMapping(value = "/rate/{viazId}/{rating}")
+//    public String rateShipment(@PathVariable String viazId, @PathVariable Integer rating){
+//        return ratingService
+//    }
 }
