@@ -1,6 +1,8 @@
-package com.viaz.dashboard.user.helpers;
+package com.viaz.dashboard.entity.user.helpers;
 
-import com.viaz.dashboard.user.*;
+import com.viaz.dashboard.entity.role.Role;
+import com.viaz.dashboard.entity.role.RoleRepository;
+import com.viaz.dashboard.entity.user.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
