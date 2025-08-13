@@ -12,17 +12,17 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "juanmavillalobosn@gmail.com",
+  "email": "juanmavillalobosn@gmail.com",
   "password": "juan2005"
 }
 
 ### Create Unvalidated User
 POST localhost:8080/api/auth/register
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NDczMzM4OTcsImV4cCI6MTc0NzMzNDQ5N30.dfdaLYbQbQyDWr1QHSla3a9ob6WVV4pHcJvLIaTEnA0TpbD7BUFSxwia-zvlgvWFLpmpA9PW_TXbLt3iHMuRvw
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTUxMDkwMjEsImV4cCI6MTc1NTEwOTYyMX0.jCQBERLd24e01CAB0LVpHxibeOpn6pNIczFiSL4kk76CUSJoWogTBTuY5wXlCSoEE6Zi8GIwVdG1nLibLXheTw
 Content-Type: application/json
 
 {
-  "username": "Juanma",
+  "username": "admin",
   "email": "juanmavillalobosn@gmail.com",
   "roles": ["ADMIN"]
 }
@@ -56,7 +56,7 @@ POST localhost:8080/api/auth/refresh-token
 
 ### Get Shipments
 GET localhost:8080/api/shipment/get-all-shipments
-#Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0MTM3MTcyOCwiZXhwIjoxNzQxMzcyMzI4fQ.Ns3PE0aq86a-Xodu3wzwThXyuFppM4BUgS2vceRe7kJGpxx0LMR9fx81QISdmGl27psV8AaDg1f8KO4lO3rA6Q
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTUxMDc0NDAsImV4cCI6MTc1NTEwODA0MH0.ImEWY7CXDTvPrLli4gfIQ7Pcx5nG0AB7aeKIQizBwnPimoklqzESXRHBmm_OHgdU6Q_SRvr_tDFuI59V17Sh1w
 
 ### Get Users
 GET localhost:8080/api/user/get-all-users
@@ -92,3 +92,25 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRta
 ### Get document URL
 GET http://localhost:8080/api/shipment/download-file/VZ-2024-012/lobster.jpg
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NDcyNjAzNTksImV4cCI6MTc0NzI2MDk1OX0.pCvTIUhZ-ru9qXAGyXYDwGvpP2iPZeseX_UKUkxaobqNi33juhqqkV0cfHRMLvbCjZjSKiidOvuPyefY5IM0bw
+
+### Upload File
+POST localhost:8080/api/shipment/{{viazId}}/upload-file
+
+
+### Ping server to ckeck uhtentication
+GET http://localhost:8080/api/auth/ping
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NDcyNjAzNTksImV4cCI6MTc0NzI2MDk1OX0.pCvTIUhZ-ru9qXAGyXYDwGvpP2iPZeseX_UKUkxaobqNi33juhqqkV0cfHRMLvbCjZjSKiidOvuPyefY5IM0bw
+
+
+### Create Carrier
+POST http://localhost:8080/api/carrier/create-carrier
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTUxMDgzMjQsImV4cCI6MTc1NTEwODkyNH0.5FkluAkwOTIAANN07wtJNDS4uS5gCT21shBY7DiQnTl-EDpYZ8ItXNhqH8j_Lc_7mWoBJ0a4_Pesgw6U-ZeVOA
+Content-Type: application/json
+
+{
+  "name": "Cava"
+}
+
+### Get Carriers
+GET http://localhost:8080/api/carrier/get-carriers
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTUxMDc1NzEsImV4cCI6MTc1NTEwODE3MX0.sAjBPuP_N_ScKYe9o5S5sgbfWwcXSx0SwvcBmVePxLfHqUoeSSe3lI7lvURmQSrFTMC8dJNZ8da4eIpATPLKDw",

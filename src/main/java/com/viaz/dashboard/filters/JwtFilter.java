@@ -3,11 +3,10 @@ package com.viaz.dashboard.filters;
 import com.viaz.dashboard.exception.exceptions.TokenValidationException;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
-import com.viaz.dashboard.user.userDetails.ViazUserDetailsService;
+import com.viaz.dashboard.entity.user.userDetails.ViazUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -118,7 +117,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private void handleError(HttpServletResponse response, String message, int status) throws IOException {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(String.format("{\"error\": \"%s\", \"timestamp\": \"%s\"}", 
-                message, java.time.LocalDateTime.now()));
+        response.getWriter().write(String.format("{\"error\": \"%s\", \"timestamp\": \"%s\", \"status\": %d}",
+                message, java.time.LocalDateTime.now(), status));
     }
 }

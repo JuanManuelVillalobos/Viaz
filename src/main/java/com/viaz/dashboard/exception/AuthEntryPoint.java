@@ -34,8 +34,11 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
                 boolean hasRefreshTokenCookie = false;
                 if (request.getCookies() != null) {
                     for (Cookie cookie : request.getCookies()) {
+                        log.info("Cookie: {}", cookie.getName());
                         if (REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                            log.info("Found refresh token cookie in request");
                             hasRefreshTokenCookie = true;
+                            break;
                         }
                     }
                 }

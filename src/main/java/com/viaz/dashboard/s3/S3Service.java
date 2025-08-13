@@ -2,6 +2,7 @@ package com.viaz.dashboard.s3;
 
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -31,6 +32,7 @@ public class S3Service {
                 .build();
     }
 
+        @CacheEvict(value = "s3Objects", allEntries = true)
     public PutObjectResponse putObject(String key, byte[] file) {
         System.out.println("Uploading to S3 bucket: " + bucketName + " with key: " + key + " ...");
         PutObjectRequest objectRequest = PutObjectRequest.builder()
@@ -105,5 +107,14 @@ public class S3Service {
             // Fallback to binary stream
             return "application/octet-stream";
         }
+    }
+
+    @CacheEvict(value = "s3Objects", allEntries = true)
+    public void deleteObject(String objectKey) {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build();
+        s3.deleteObject(deleteObjectRequest);
     }
 }

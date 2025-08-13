@@ -1,8 +1,8 @@
 package com.viaz.dashboard.auth;
 
 import com.viaz.dashboard.jwt.Token;
-import com.viaz.dashboard.user.ViazUser;
-import com.viaz.dashboard.user.helpers.ViazUserDTO;
+import com.viaz.dashboard.entity.user.ViazUser;
+import com.viaz.dashboard.entity.user.helpers.ViazUserDTO;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +18,11 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
     }
 
     // Register User
