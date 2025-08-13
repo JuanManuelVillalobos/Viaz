@@ -1,6 +1,6 @@
-package com.viaz.dashboard.user.userDetails;
+package com.viaz.dashboard.entity.user.userDetails;
 
-import com.viaz.dashboard.user.ViazUser;
+import com.viaz.dashboard.entity.user.ViazUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
