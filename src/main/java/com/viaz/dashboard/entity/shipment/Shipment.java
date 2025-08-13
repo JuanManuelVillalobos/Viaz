@@ -1,5 +1,6 @@
 package com.viaz.dashboard.entity.shipment;
 
+import com.viaz.dashboard.entity.carrier.Carrier;
 import jakarta.persistence.*;
 import lombok.*;
 import org.checkerframework.checker.units.qual.C;
@@ -68,8 +69,9 @@ public class Shipment {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime shipmentDate;
 
-    @Column(name = "transport")
-    private String transport;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transport_carrier_id", referencedColumnName = "name")
+    private Carrier transport;
 
     @Column(name = "operator")
     private String operator;
@@ -130,6 +132,8 @@ public class Shipment {
     @Column(name = "number_of_files")
     private Integer files;
 
+
+    //    Shipment Statistics
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
