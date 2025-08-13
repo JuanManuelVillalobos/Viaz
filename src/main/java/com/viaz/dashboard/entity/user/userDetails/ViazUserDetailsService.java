@@ -1,7 +1,7 @@
-package com.viaz.dashboard.user.userDetails;
+package com.viaz.dashboard.entity.user.userDetails;
 
-import com.viaz.dashboard.user.ViazUser;
-import com.viaz.dashboard.user.UserRepository;
+import com.viaz.dashboard.entity.user.ViazUser;
+import com.viaz.dashboard.entity.user.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
