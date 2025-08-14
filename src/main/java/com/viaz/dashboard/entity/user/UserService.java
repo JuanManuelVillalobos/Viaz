@@ -99,17 +99,18 @@ public class UserService {
         // Check for minimum length
         if (password.length() < 8) return false;
 
-        // Check for at least one uppercase letter
-        if (!password.matches(".*[A-Z].*")) return false;
-
-        // Check for at least one lowercase letter
-        if (!password.matches(".*[a-z].*")) return false;
-
-        // Check for at least one digit
-        if (!password.matches(".*\\d.*")) return false;
-
-        // Check for at least one special character
-        return password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
+        return true;
+//        // Check for at least one uppercase letter
+//        if (!password.matches(".*[A-Z].*")) return false;
+//
+//        // Check for at least one lowercase letter
+//        if (!password.matches(".*[a-z].*")) return false;
+//
+//        // Check for at least one digit
+//        if (!password.matches(".*\\d.*")) return false;
+//
+//        // Check for at least one special character
+//        return password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
     }
 
     public ViazUser createUnValidatedUser(ViazUser user) {
