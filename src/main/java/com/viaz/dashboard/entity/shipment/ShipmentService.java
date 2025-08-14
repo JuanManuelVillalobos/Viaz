@@ -1,6 +1,9 @@
 package com.viaz.dashboard.entity.shipment;
 
+import com.viaz.dashboard.entity.carrier.Carrier;
 import com.viaz.dashboard.entity.carrier.CarrierService;
+import com.viaz.dashboard.entity.shipment.helpers.ShipmentDTO;
+import com.viaz.dashboard.entity.shipment.helpers.ShipmentRequest;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.s3.S3Service;
 import com.viaz.dashboard.entity.shipment.idGenerator.ShipmentIdGeneratorService;
@@ -9,6 +12,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
@@ -44,6 +48,9 @@ public class ShipmentService {
         this.carrierService = carrierService;
     }
 
+    public ShipmentDTO getShipmentByIdDTO(String viazId) {
+        return new ShipmentDTO(getShipmentById(viazId));
+    }
 
     public Shipment getShipmentById(String viazId) {
         return shipmentRepository.findByViazId(viazId);
@@ -51,22 +58,32 @@ public class ShipmentService {
 
 
     @Cacheable(value = "shipments", key = "'allShipments'")
-    public List<Shipment> getShipments() {
-        return shipmentRepository.findAll(Sort.by("viazId").descending());
+    public List<ShipmentDTO> getShipments() {
+        return shipmentRepository.findAll(Sort.by("viazId").descending())
+                .stream()
+                .map(ShipmentDTO::new)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Cacheable(value = "shipments", key = "'pendingShipments'")
-    public List<Shipment> getPendingShipments() {
-        return shipmentRepository.getPendingShipments();
+    public List<ShipmentDTO> getPendingShipments() {
+        return shipmentRepository.getPendingShipments()
+                .stream()
+                .map(ShipmentDTO::new)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @CacheEvict(value = "shipments", allEntries = true)
-    public Shipment createShipment(Shipment shipment) {
-        System.out.println(shipment);
+    public Shipment createShipment(ShipmentRequest shipmentRequest) {
+        Shipment shipment = new Shipment();
+        Carrier carrier = carrierService.getCarrierByName(shipmentRequest.transport());
+        shipment.setTransport(carrier);
+
+        BeanUtils.copyProperties(shipmentRequest, shipment);
+
         shipment.setViazId(shipmentIdGeneratorService.generateShipmentId());
         shipment.setYear(Year.now().getValue());
         shipment.setSequence(extractSequenceFromId(shipment.getViazId()));
-        shipment.setTransport(carrierService.getCarrierById(1L));
         return shipmentRepository.save(shipment);
     }
 
@@ -77,7 +94,7 @@ public class ShipmentService {
     }
 
     @CacheEvict(value = "shipments", allEntries = true)
-    public Shipment updateShipment(String viazId, Map<String, Object> updates) {
+    public ShipmentDTO updateShipment(String viazId, Map<String, Object> updates) {
         Shipment existingShipment = getShipmentById(viazId);
 
         updates.forEach((key, value) -> {
@@ -86,7 +103,15 @@ public class ShipmentService {
                 field.setAccessible(true);
 
                 if (value != null) {
-                    if (field.getType() == LocalDateTime.class) {
+                    if (field.getType() == Carrier.class) {
+                        if (value instanceof String) {
+                            Carrier carrier = carrierService.getCarrierByName((String) value);
+                            field.set(existingShipment, carrier);
+                        } else {
+                            log.warn("Value for field {} is not a String, cannot parse as Carrier.", key);
+                        }
+
+                    } else if (field.getType() == LocalDateTime.class) {
                         if (value instanceof String) {
                             try {
                                 LocalDateTime dateTime = LocalDateTime.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -98,7 +123,7 @@ public class ShipmentService {
                             log.warn("Value for field {} is not a String, cannot parse as LocalDateTime.", key);
                         }
                     } else if (field.getType() == LocalDate.class) {
-                         if (value instanceof String) {
+                        if (value instanceof String) {
                             try {
                                 LocalDate date = LocalDate.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE);
                                 field.set(existingShipment, date);
@@ -108,8 +133,7 @@ public class ShipmentService {
                         } else {
                             log.warn("Value for field {} is not a String, cannot parse as LocalDate.", key);
                         }
-                    }
-                    else {
+                    } else {
                         field.set(existingShipment, value);
                     }
                 } else {
@@ -124,7 +148,7 @@ public class ShipmentService {
         shipmentRepository.save(existingShipment);
 
 
-        return getShipmentById(viazId); // Return the updated shipment
+        return new ShipmentDTO(getShipmentById(viazId)); // Return the updated shipment
     }
 
 
