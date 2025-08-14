@@ -3,8 +3,6 @@ package com.viaz.dashboard.entity.carrier;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @ToString
 @Getter
 @Setter
@@ -22,4 +20,5 @@ public class Carrier {
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
+
 }

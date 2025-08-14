@@ -1,6 +1,8 @@
 package com.viaz.dashboard.entity.shipment;
 
 import com.viaz.dashboard.entity.rating.RatingService;
+import com.viaz.dashboard.entity.shipment.helpers.ShipmentDTO;
+import com.viaz.dashboard.entity.shipment.helpers.ShipmentRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,26 +26,26 @@ public class ShipmentController {
 
 
     @GetMapping("/get-all-shipments")
-    public List<Shipment> getShipments() {
+    public List<ShipmentDTO> getShipments() {
         return shipmentService.getShipments();
     }
 
     @GetMapping("get-pending-shipments")
-    public List<Shipment> getPendingShipments() { return shipmentService.getPendingShipments(); }
+    public List<ShipmentDTO> getPendingShipments() { return shipmentService.getPendingShipments(); }
 
     @GetMapping("/get-shipment/{viazId}")
-    public Shipment getShipment(@PathVariable("viazId") String viazId) {
-        return shipmentService.getShipmentById(viazId);
+    public ShipmentDTO getShipment(@PathVariable("viazId") String viazId) {
+        return shipmentService.getShipmentByIdDTO(viazId);
     }
 
     @PostMapping("/create-shipment")
-    public Shipment createShipment(@RequestBody Shipment shipment) {
+    public Shipment createShipment(@RequestBody ShipmentRequest shipment) {
         return shipmentService.createShipment(shipment);
     }
 
 
     @PatchMapping(path = "/update-shipment/{viazId}")
-    public Shipment updateShipment(
+    public ShipmentDTO updateShipment(
             @PathVariable("viazId") String viazId,
             @RequestBody Map<String, Object> updates) {
         return shipmentService.updateShipment(viazId, updates);

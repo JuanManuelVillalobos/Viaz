@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -98,11 +99,23 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.LOCKED);
     }
 
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<Map<String, Object>> handleNoSuchElementException(NoSuchElementException ex) {
+        log.error("The element does not exist: {}", ex.getMessage());
+
+        Map<String, Object> response = createErrorResponse(
+                HttpStatus.NOT_FOUND,
+                "The element was not found.",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.LOCKED);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         // You can inspect the cause of the exception to provide a more specific message
         // For unique constraint violations, the cause often contains details.
-        String errorMessage = "A data integrity violation occurred.";
 
         if (ex.getCause() != null && ex.getCause().getMessage() != null) {
             String causeMessage = ex.getCause().getMessage();

@@ -1,8 +1,9 @@
 package com.viaz.dashboard.entity.shipment;
 
+import com.viaz.dashboard.entity.carrier.Carrier;
+import com.viaz.dashboard.entity.rating.Rating;
 import jakarta.persistence.*;
 import lombok.*;
-import org.checkerframework.checker.units.qual.C;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -68,8 +69,9 @@ public class Shipment {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime shipmentDate;
 
-    @Column(name = "transport")
-    private String transport;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transport", referencedColumnName = "carrier_id")
+    private Carrier transport;
 
     @Column(name = "operator")
     private String operator;
@@ -114,6 +116,7 @@ public class Shipment {
     @Column(name = "cleaning_patio")
     private String cleaningPatio;
 
+    //    Fecha de Vacío
     @Column(name = "cleaning_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime cleaningDate;
@@ -130,6 +133,8 @@ public class Shipment {
     @Column(name = "number_of_files")
     private Integer files;
 
+
+    //    Shipment Statistics
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
@@ -137,6 +142,11 @@ public class Shipment {
     @LastModifiedDate
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
+
+
+    @OneToOne
+    @JoinColumn(name = "rating_id")
+    private Rating rating;
 
 
     @PrePersist
