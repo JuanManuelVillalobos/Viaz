@@ -1,5 +1,6 @@
 package com.viaz.dashboard.entity.carrier;
 
+import com.viaz.dashboard.entity.shipment.Shipment;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,4 +23,5 @@ public class Carrier {
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
+
 }
