@@ -1,10 +1,7 @@
 package com.viaz.dashboard.entity.carrier;
 
-import com.viaz.dashboard.entity.shipment.Shipment;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.UUID;
 
 @ToString
 @Getter
