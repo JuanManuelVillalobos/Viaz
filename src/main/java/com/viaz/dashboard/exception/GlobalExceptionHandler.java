@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -92,6 +93,19 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = createErrorResponse(
                 HttpStatus.LOCKED,
                 "Account Locked",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.LOCKED);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<Map<String, Object>> handleNoSuchElementException(NoSuchElementException ex) {
+        log.error("The element does not exist: {}", ex.getMessage());
+
+        Map<String, Object> response = createErrorResponse(
+                HttpStatus.NOT_FOUND,
+                "The element was not found.",
                 ex.getMessage()
         );
 
