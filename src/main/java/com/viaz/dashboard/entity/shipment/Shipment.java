@@ -1,6 +1,7 @@
 package com.viaz.dashboard.entity.shipment;
 
 import com.viaz.dashboard.entity.carrier.Carrier;
+import com.viaz.dashboard.entity.rating.Rating;
 import jakarta.persistence.*;
 import lombok.*;
 import org.checkerframework.checker.units.qual.C;
@@ -70,7 +71,7 @@ public class Shipment {
     private LocalDateTime shipmentDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transport_carrier_id", referencedColumnName = "name")
+    @JoinColumn(name = "transport", referencedColumnName = "carrier_id")
     private Carrier transport;
 
     @Column(name = "operator")
@@ -116,6 +117,7 @@ public class Shipment {
     @Column(name = "cleaning_patio")
     private String cleaningPatio;
 
+    //    Fecha de Vacío
     @Column(name = "cleaning_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime cleaningDate;
@@ -141,6 +143,11 @@ public class Shipment {
     @LastModifiedDate
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
+
+
+    @OneToOne
+    @JoinColumn(name = "rating_id")
+    private Rating rating;
 
 
     @PrePersist
