@@ -4,7 +4,6 @@ import com.viaz.dashboard.entity.carrier.Carrier;
 import com.viaz.dashboard.entity.rating.Rating;
 import jakarta.persistence.*;
 import lombok.*;
-import org.checkerframework.checker.units.qual.C;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
