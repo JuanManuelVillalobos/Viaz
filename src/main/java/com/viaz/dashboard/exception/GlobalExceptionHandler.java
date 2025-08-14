@@ -116,7 +116,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         // You can inspect the cause of the exception to provide a more specific message
         // For unique constraint violations, the cause often contains details.
-        String errorMessage = "A data integrity violation occurred.";
 
         if (ex.getCause() != null && ex.getCause().getMessage() != null) {
             String causeMessage = ex.getCause().getMessage();
