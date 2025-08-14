@@ -1,7 +1,5 @@
 package com.viaz.dashboard.entity.shipment.helpers;
 
-import com.viaz.dashboard.entity.carrier.CarrierDTO;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
