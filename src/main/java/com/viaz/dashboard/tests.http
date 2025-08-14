@@ -37,11 +37,10 @@ juanmavillalobosn@gmail.com
 
 
 ### Register User With Password
-POST localhost:8080/api/auth/set-password?token=Ski8SnFd7aibqZyzveUq8Vn4xTvsLQWzwpHgMJS-pB4&email=juanmavillalobosn@gmail.com
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0MTIwMTExOCwiZXhwIjoxNzQxMjAxNzE4fQ.15OjNBr9GC9aDrDR1AA8x-wVL9LrKWTg6YUpFkaIXGds1pSuI0D1bXW4Dqf-gyj97jFlwx68tcGdLtxtUN7wlg
+POST localhost:8080/api/auth/set-password?token=wLQWrxIER92wTNwSq5yIO-RlLrmNBTuI2bJIe82i8Y8&email=juanmavillalobosn@gmail.com
 Content-Type: text/plain
 
-password123
+j23456789
 
 
 
@@ -104,7 +103,7 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRta
 
 ### Create Carrier
 POST http://localhost:8080/api/carrier/create-carrier
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTUxMTk4NDYsImV4cCI6MTc1NTEyMDQ0Nn0.jGqaRFOFDhBjvjvTidkA_Glcs0GY5FVoR7QEosTGh_nCgIgUcTy24FaAMpltP8A7MipYzhCcWiYPZdLFP3qfPQ
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTUyMTAwODgsImV4cCI6MTc1NTIxMDY4OH0.P97zx6q2nYfOZsckVLCov5qKSJJPurrA1LWvTzUi6Jx4-MQQMj0Cubg4iPlHJeqJ2hBkycWxzeujeKIlKN4Lkw
 Content-Type: application/json
 
 {
