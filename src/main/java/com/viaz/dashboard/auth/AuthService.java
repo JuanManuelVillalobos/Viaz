@@ -1,6 +1,9 @@
 package com.viaz.dashboard.auth;
 
+import com.viaz.dashboard.auth.helper.UserAuthResponse;
 import com.viaz.dashboard.email.EmailService;
+import com.viaz.dashboard.entity.permission.Permission;
+import com.viaz.dashboard.entity.user.userDetails.ViazUserDetails;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.Token;
@@ -12,16 +15,22 @@ import com.viaz.dashboard.entity.user.userDetails.ViazUserDetailsService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -40,6 +49,52 @@ public class AuthService {
         this.blacklistService = blacklistService;
         this.emailService = emailService;
         this.userService = userService;
+    }
+
+
+    public ResponseEntity<UserAuthResponse> getCurrentUserAuth(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ViazUserDetails userDetails = (ViazUserDetails) authentication.getPrincipal();
+
+        UserAuthResponse response = UserAuthResponse.builder()
+            .user(mapToUserInfo(userDetails))
+            .effectivePermissions(getEffectivePermissions(userDetails))
+            .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Helper methods
+    private UserAuthResponse.UserInfo mapToUserInfo(ViazUserDetails userDetails) {
+        var user = userDetails.viazUser();
+
+        List<UserAuthResponse.RoleInfo> roleInfos = user.getRoles().stream()
+            .map(role -> UserAuthResponse.RoleInfo.builder()
+                .name(role.getName())
+                .displayName(role.getDisplayName())
+                .description(role.getDescription())
+                .permissions(role.getPermissions().stream()
+                    .map(Permission::getName)
+                    .collect(Collectors.toList()))
+                .build())
+            .collect(Collectors.toList());
+
+        return UserAuthResponse.UserInfo.builder()
+            .userId(user.getUserId().toString())
+            .email(user.getEmail())
+            .username(user.getUsername())
+            .roles(roleInfos)
+            .build();
+    }
+
+    private List<String> getEffectivePermissions(ViazUserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .filter(auth -> !auth.startsWith("ROLE_")) // Filter out role authorities, keep permissions
+            .collect(Collectors.toList());
     }
 
     public ViazUser register(ViazUserDTO viazUser) throws MessagingException {
