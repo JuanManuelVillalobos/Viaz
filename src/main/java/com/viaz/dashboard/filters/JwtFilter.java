@@ -1,5 +1,6 @@
 package com.viaz.dashboard.filters;
 
+import com.viaz.dashboard.config.PublicUrlConfig;
 import com.viaz.dashboard.exception.exceptions.TokenValidationException;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
@@ -9,10 +10,12 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.NonNullApi;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,17 +27,18 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final ApplicationContext applicationContext;
     private final BlacklistService blacklistService;
+    private final PublicUrlConfig publicUrlConfig;
 
-    public JwtFilter(JwtUtil jwtUtil, ApplicationContext applicationContext, BlacklistService blacklistService) {
-        this.jwtUtil = jwtUtil;
-        this.applicationContext = applicationContext;
-        this.blacklistService = blacklistService;
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return publicUrlConfig.isPublic(request);
     }
 
     @Override
@@ -51,7 +55,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             String token = tokenOpt.get();
-            
+
             // Check if token is blacklisted
             if (blacklistService.isBlacklisted(token)) {
                 handleError(response, "Token has been revoked", HttpServletResponse.SC_UNAUTHORIZED);
@@ -59,14 +63,14 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             processToken(token, request);
-            
+
             // Add security headers
             response.setHeader("X-Content-Type-Options", "nosniff");
             response.setHeader("X-Frame-Options", "DENY");
             response.setHeader("X-XSS-Protection", "1; mode=block");
-            
+
             filterChain.doFilter(request, response);
-            
+
         } catch (ExpiredJwtException e) {
             log.warn("JWT token has expired", e);
             handleError(response, "JWT token has expired", HttpServletResponse.SC_UNAUTHORIZED);
@@ -108,7 +112,7 @@ public class JwtFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("Authentication set for user: {}", username);
         }
