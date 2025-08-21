@@ -148,6 +148,9 @@ public class Shipment {
     @JoinColumn(name = "rating_id")
     private Rating rating;
 
+    @Column(name = "open")
+    private Boolean open;
+
 
     @PrePersist
     public void generateId() {
