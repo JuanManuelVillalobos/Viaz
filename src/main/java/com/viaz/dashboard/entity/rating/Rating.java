@@ -1,5 +1,6 @@
 package com.viaz.dashboard.entity.rating;
 
+import com.viaz.dashboard.entity.carrier.Carrier;
 import com.viaz.dashboard.entity.shipment.Shipment;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,10 +26,13 @@ public class Rating {
     private Long ratingId;
 
     @Column(name = "shipment_rating")
-    private String shipmentRating;
+    private Integer shipmentRating;
 
     @Column(name = "customer_service_rating")
-    private String customerServiceRating;
+    private Integer customerServiceRating;
+
+    @Column(name = "rating_observation")
+    private String ratingObservation;
 
 
 
@@ -44,4 +48,8 @@ public class Rating {
     @OneToOne
     @JoinColumn(name = "viaz_id")
     private Shipment shipment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "carrier", referencedColumnName = "carrier_id")
+    private Carrier carrier;
 }
