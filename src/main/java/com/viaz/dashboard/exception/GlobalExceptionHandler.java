@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -47,6 +48,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalStateException(IllegalStateException ex) {
+        log.error("Illegal state error: {}", ex.getMessage());
+
+        Map<String, Object> response = createErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Illegal State Error",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         log.error("Resource not found: {}", ex.getMessage());
@@ -64,58 +78,83 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleInsufficientAuthenticationException(InsufficientAuthenticationException ex) {
         log.error("Insufficient authentication: {}", ex.getMessage());
 
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
         Map<String, Object> response = createErrorResponse(
-                HttpStatus.UNAUTHORIZED,
+                status,
                 "Insufficient Authentication",
                 ex.getMessage()
         );
 
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
 
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+
         Map<String, Object> response = createErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
+                status,
                 "Server Error",
                 "An unexpected error occurred"
         );
 
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<Map<String, Object>> handleLockedException(LockedException ex) {
         log.error("Account locked error: {}", ex.getMessage());
 
+        HttpStatus status = HttpStatus.LOCKED;
+
         Map<String, Object> response = createErrorResponse(
-                HttpStatus.LOCKED,
+                status,
                 "Account Locked",
                 ex.getMessage()
         );
 
-        return new ResponseEntity<>(response, HttpStatus.LOCKED);
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<Map<String, Object>> handleNoSuchElementException(NoSuchElementException ex) {
         log.error("The element does not exist: {}", ex.getMessage());
 
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
         Map<String, Object> response = createErrorResponse(
-                HttpStatus.NOT_FOUND,
+                status,
                 "The element was not found.",
                 ex.getMessage()
         );
 
-        return new ResponseEntity<>(response, HttpStatus.LOCKED);
+        return new ResponseEntity<>(response, status);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+        log.error("Authorization denied error: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.FORBIDDEN;
+
+        Map<String, Object> response = createErrorResponse(
+                status,
+                "Authorization Denied",
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         // You can inspect the cause of the exception to provide a more specific message
         // For unique constraint violations, the cause often contains details.
+
+        HttpStatus status = HttpStatus.CONFLICT;
 
         if (ex.getCause() != null && ex.getCause().getMessage() != null) {
             String causeMessage = ex.getCause().getMessage();
@@ -124,27 +163,27 @@ public class GlobalExceptionHandler {
 
                 if (causeMessage.contains("name")) {
                     Map<String, Object> duplicateResponse = createErrorResponse(
-                            HttpStatus.CONFLICT,
+                            status,
                             "Cannot save record with duplicate name. Please use a unique value.",
                             "Error violating unique constraint."
                     );
-                    return new ResponseEntity<>(duplicateResponse, HttpStatus.CONFLICT);
+                    return new ResponseEntity<>(duplicateResponse, status);
                 }
 
                 Map<String, Object> duplicateResponse = createErrorResponse(
-                        HttpStatus.CONFLICT,
+                        status,
                         "The record you are trying to save already exists (e.g., duplicate name). Please use a unique value.",
                         "Error violating unique constraint."
                 );
-                return new ResponseEntity<>(duplicateResponse, HttpStatus.CONFLICT);
+                return new ResponseEntity<>(duplicateResponse, status);
             }
         }
         Map<String, Object> defaultResponse = createErrorResponse(
-                HttpStatus.CONFLICT,
+                status,
                 "A data integrity violation occurred.",
                 "Error violating unique constraint."
         );
-        return new ResponseEntity<>(defaultResponse, HttpStatus.CONFLICT); // 409 Conflict is appropriate for unique constraint violations
+        return new ResponseEntity<>(defaultResponse, status); // 409 Conflict is appropriate for unique constraint violations
     }
 
 
