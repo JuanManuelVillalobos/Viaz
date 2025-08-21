@@ -28,15 +28,15 @@ public class JwtUtil {
 
     public String generateAccessToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-            claims.put("type", "access");
+        claims.put("type", "access");
         // 10 minutes
-        long ACCESS_TOKEN_VALIDITY = 60 * 10;
+        long ACCESS_TOKEN_VALIDITY =  10 * 60;
         return createToken(claims, username, ACCESS_TOKEN_VALIDITY);
     }
 
     public String generateRefreshToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-            claims.put("type", "refresh");
+        claims.put("type", "refresh");
         // 30 days
         long REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 30;
         return createToken(claims, username, REFRESH_TOKEN_VALIDITY);
@@ -87,6 +87,11 @@ public class JwtUtil {
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
+
+    public Date extractIssuedAt(String token) {
+        return extractClaim(token, Claims::getIssuedAt);
+    }
+
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
