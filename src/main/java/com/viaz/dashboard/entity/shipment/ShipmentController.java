@@ -3,6 +3,7 @@ package com.viaz.dashboard.entity.shipment;
 import com.viaz.dashboard.entity.rating.RatingService;
 import com.viaz.dashboard.entity.shipment.helpers.ShipmentDTO;
 import com.viaz.dashboard.entity.shipment.helpers.ShipmentRequest;
+import lombok.NonNull;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -90,8 +91,9 @@ public class ShipmentController {
         return shipmentService.deleteObject(viazId, objectKey);
     }
 
-//    @PostMapping(value = "/rate/{viazId}/{rating}")
-//    public String rateShipment(@PathVariable String viazId, @PathVariable Integer rating){
-//        return ratingService
-//    }
+    @PostMapping(value = "/close-shipment/{viazId}/{rating}/{observations}")
+    public ResponseEntity<String> closeShipment(@NonNull @PathVariable String viazId,@NonNull @PathVariable Integer rating, @PathVariable String observations) {
+        return ratingService.createRating(viazId,rating,observations);
+    }
+
 }
