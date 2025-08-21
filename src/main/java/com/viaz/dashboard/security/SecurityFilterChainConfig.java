@@ -1,8 +1,10 @@
 package com.viaz.dashboard.security;
 
+import com.viaz.dashboard.config.PublicUrlConfig;
 import com.viaz.dashboard.exception.AuthEntryPoint;
 import com.viaz.dashboard.filters.JwtFilter;
 import com.viaz.dashboard.filters.RateLimitingFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class SecurityFilterChainConfig {
@@ -20,31 +23,23 @@ public class SecurityFilterChainConfig {
     private final AuthEntryPoint authEntryPoint;
     private final RateLimitingFilter rateLimitingFilter;
 
-    public SecurityFilterChainConfig(JwtFilter jwtFilter, AuthEntryPoint authEntryPoint, RateLimitingFilter rateLimitingFilter) {
-        this.authEntryPoint = authEntryPoint;
-        this.rateLimitingFilter = rateLimitingFilter;
-        this.jwtFilter = jwtFilter;
-    }
-
 
     @Bean
-    public org.springframework.security.web.SecurityFilterChain securityFilterChain(final HttpSecurity http)
+    public org.springframework.security.web.SecurityFilterChain securityFilterChain(final HttpSecurity http, PublicUrlConfig publicUrlConfig)
             throws Exception {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(authEntryPoint))
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/api/shipment/upload-excel",
-                                        "/api/auth/login",
-                                        "/api/auth/forgot-password",
-                                        "/api/auth/set-password",
-                                        "/api/auth/refresh-token").permitAll()
-                                .requestMatchers("/api/**").authenticated()
-                                .requestMatchers("/**").permitAll()
-                )
+                .authorizeHttpRequests(authorizeRequests -> {
+                    publicUrlConfig.getPublicMatchers().forEach(matcher -> {
+                        authorizeRequests.requestMatchers(matcher).permitAll();
+                    });
+                    authorizeRequests
+                            .requestMatchers("/api/**").authenticated()
+                            .requestMatchers("/**").permitAll();
+                })
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

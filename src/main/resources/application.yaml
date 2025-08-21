@@ -28,7 +28,7 @@ spring:
         format_sql: false
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+    show-sql: false
   ###
   ### EMAIL SERVICE
   mail:
@@ -58,7 +58,7 @@ server:
 #  address: 0.0.0.0
 logging:
   level:
-    org.springframework.mail: debug
+    org.springframework.mail: warn
   ###
 
 ### JWT SECRET KEY

@@ -19,7 +19,7 @@ import java.util.Set;
 @ToString
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "viaz_dashboard_users")
@@ -36,6 +36,7 @@ public class ViazUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
+    @EqualsAndHashCode.Include
     private Long userId;
 
     @NotBlank(message = "Username is required")

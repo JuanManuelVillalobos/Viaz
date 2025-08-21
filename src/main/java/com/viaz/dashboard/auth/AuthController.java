@@ -1,10 +1,13 @@
 package com.viaz.dashboard.auth;
 
+import com.viaz.dashboard.auth.helper.UserAuthResponse;
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.entity.user.ViazUser;
 import com.viaz.dashboard.entity.user.helpers.ViazUserDTO;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -20,9 +23,9 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/ping")
-    public String ping() {
-        return "pong";
+    @GetMapping("/me")
+    public ResponseEntity<UserAuthResponse> getCurrentUserAuth(Authentication authentication){
+        return authService.getCurrentUserAuth(authentication);
     }
 
     // Register User

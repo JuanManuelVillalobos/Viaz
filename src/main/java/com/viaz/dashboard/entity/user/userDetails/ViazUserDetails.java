@@ -1,25 +1,37 @@
 package com.viaz.dashboard.entity.user.userDetails;
 
+import com.viaz.dashboard.entity.permission.Permission;
+import com.viaz.dashboard.entity.role.Role;
 import com.viaz.dashboard.entity.user.ViazUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
 public record ViazUserDetails(ViazUser viazUser) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (viazUser.getRoles() == null || viazUser.getRoles().isEmpty()) {
-            // Fallback to 'default' role if no roles assigned
-            return java.util.Collections.singletonList(new SimpleGrantedAuthority("USER"));
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+
+        // Add role-based authorities
+        for (Role role : viazUser.getRoles()) {
+            if (!role.isCosmetic()) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+
+                // Add permission-based authorities from this role
+                for (Permission permission : role.getPermissions()) {
+                    authorities.add(new SimpleGrantedAuthority(permission.getName()));
+                }
+            }
         }
-        return viazUser.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toSet());
+
+        return authorities;
     }
+
 
     @Override
     public String getPassword() {

@@ -23,5 +23,9 @@ public class CarrierController {
         return carrierService.getCarriers();
     }
 
+    @PostMapping("/change-name/{carrierId}/{newname}")
+    public ResponseEntity<String> changeCarrierName(@PathVariable Long carrierId, @PathVariable String newname) {
+        return carrierService.changeCarrierName(carrierId, newname);
+    }
 
 }
