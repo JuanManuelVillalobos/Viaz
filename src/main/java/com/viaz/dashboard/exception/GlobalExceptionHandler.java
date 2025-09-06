@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingRequestCookieException.class)
     public ResponseEntity<ApiErrorResponse> handleMissingRequestCookieException(MissingRequestCookieException ex) {
         log.error("Missing request cookie: {}", ex.getMessage());
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
         return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Missing Request Cookie", ex.getMessage()));
     }
 
