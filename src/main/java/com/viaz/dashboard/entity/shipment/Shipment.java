@@ -1,17 +1,25 @@
 package com.viaz.dashboard.entity.shipment;
 
 import com.viaz.dashboard.entity.carrier.Carrier;
+import com.viaz.dashboard.entity.incident.IncidentType;
 import com.viaz.dashboard.entity.rating.Rating;
+import com.viaz.dashboard.entity.shipment.charge.ShipmentCharge;
+import com.viaz.dashboard.entity.shipment.incident.ShipmentIncident;
+import com.viaz.dashboard.entity.user.ViazUser;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @ToString
 @Getter
@@ -38,8 +46,9 @@ public class Shipment {
     @Column(name = "transport_method")
     private String transportMethod;
 
-    @Column(name = "customer_service_agent")
-    private String customerServiceAgent;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_service_agent", referencedColumnName = "user_id")
+    private ViazUser customerServiceAgent;
 
     @Column(name = "type_of_service")
     private String typeOfService;
@@ -65,6 +74,7 @@ public class Shipment {
     @Column(name = "container_type")
     private String containerType;
 
+    //    Fecha de carga
     @Column(name = "shipment_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime shipmentDate;
@@ -134,6 +144,21 @@ public class Shipment {
     private Integer files;
 
 
+    //    Shipment Data
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ShipmentIncident> incidents = new HashSet<>();
+
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ShipmentCharge> charges = new HashSet<>();
+
+    @OneToOne
+    @JoinColumn(name = "rating_id")
+    private Rating rating;
+
+    @Column(name = "open")
+    private Boolean open = true;
+
+
     //    Shipment Statistics
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
@@ -143,13 +168,15 @@ public class Shipment {
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
 
+    @CreatedBy
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private ViazUser createdBy;
 
-    @OneToOne
-    @JoinColumn(name = "rating_id")
-    private Rating rating;
-
-    @Column(name = "open")
-    private Boolean open;
+    @LastModifiedBy
+    @ManyToOne
+    @JoinColumn(name = "last_modified_by_user_id")
+    private ViazUser lastModifiedBy;
 
 
     @PrePersist
@@ -172,6 +199,14 @@ public class Shipment {
             this.files = 0;
         }
         this.files--;
+    }
+
+    public void open() {
+        this.open = true;
+    }
+
+    public void close() {
+        this.open = false;
     }
 
 }
