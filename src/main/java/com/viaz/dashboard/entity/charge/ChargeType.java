@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Table(name = "charges")
 @Entity
-public class Charge {
+public class ChargeType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,5 +21,7 @@ public class Charge {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-
+    public ChargeType(String name) {
+        this.name = name;
+    }
 }
