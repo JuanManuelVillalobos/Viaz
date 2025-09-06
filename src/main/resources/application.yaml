@@ -7,13 +7,16 @@ spring:
   codec:
     max-in-memory-size: 10MB
 
+####
 
   ### CACHE
   cache:
     type: caffeine
     caffeine:
       spec: maximumSize=500,expireAfterWrite=60m
+
   ###
+
 
   ### DATABASE
   datasource:
@@ -30,6 +33,8 @@ spring:
       ddl-auto: create-drop
     show-sql: false
   ###
+
+
   ### EMAIL SERVICE
   mail:
     host: smtp.gmail.com
@@ -42,6 +47,8 @@ spring:
           auth: true
           starttls.enable: true
   ###
+
+
 ####
 
 ### DEBUG LEVEL
@@ -58,13 +65,19 @@ server:
 #  address: 0.0.0.0
 logging:
   level:
-    org.springframework.mail: warn
+    org.springframework.mail: debug
   ###
 
 ### JWT SECRET KEY
 jwt:
   secret:
     key: ${JWT_SECRET}
+###
+
+### ENCRYPTION KEY
+encryption:
+  key: ${ENCRYPTION_KEY}
+
 ###
 
 ### Default user after start
