@@ -1,6 +1,5 @@
 package com.viaz.dashboard.entity.charge;
 
-import com.viaz.dashboard.entity.incident.IncidentType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +13,11 @@ import java.util.List;
 @RequestMapping("/api/charge")
 public class ChargeController {
 
-    private final ChargeTypeService chargeTypeService;
+    private final ChargeService chargeService;
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'SHIPMENT_WRITE')")
-    @GetMapping(value = "/get-incident-types")
-    public List<IncidentType> getIncidentTypes() {
-        return chargeTypeService.getChargeTypes();
+    @GetMapping(value = "/get-charge-types")
+    public List<ChargeType> getIncidentTypes() {
+        return chargeService.getChargeTypes();
     }
 }
