@@ -1,6 +1,10 @@
 package com.viaz.dashboard.filters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viaz.dashboard.config.PublicUrlConfig;
+import com.viaz.dashboard.exception.ApiErrorResponse;
+import com.viaz.dashboard.exception.GlobalExceptionHandler;
+import com.viaz.dashboard.exception.exceptions.TokenRevokedException;
 import com.viaz.dashboard.exception.exceptions.TokenValidationException;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
@@ -13,15 +17,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.NonNullApi;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -35,18 +39,15 @@ public class JwtFilter extends OncePerRequestFilter {
     private final ApplicationContext applicationContext;
     private final BlacklistService blacklistService;
     private final PublicUrlConfig publicUrlConfig;
+    private final ObjectMapper objectMapper;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return publicUrlConfig.isPublic(request);
     }
 
     @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws JwtException, TokenValidationException {
         try {
             Optional<String> tokenOpt = extractToken(request);
             if (tokenOpt.isEmpty()) {
@@ -58,8 +59,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // Check if token is blacklisted
             if (blacklistService.isBlacklisted(token)) {
-                handleError(response, "Token has been revoked", HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+                throw new TokenRevokedException("Token has been revoked");
             }
 
             processToken(token, request);
@@ -72,18 +72,21 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException e) {
-            log.warn("JWT token has expired", e);
-            handleError(response, "JWT token has expired", HttpServletResponse.SC_UNAUTHORIZED);
-        } catch (JwtException e) {
-            log.warn("Invalid JWT token", e);
-            handleError(response, "Invalid JWT token", HttpServletResponse.SC_UNAUTHORIZED);
-        } catch (TokenValidationException e) {
-            log.warn("Token validation failed: {}", e.getMessage());
-            handleError(response, e.getMessage(), HttpServletResponse.SC_UNAUTHORIZED);
+            log.error("JWT Expired: {}", e.getMessage());
+            setErrorResponse(response, HttpStatus.UNAUTHORIZED, "JWT Filter Error", e.getMessage());
+        } catch (JwtException e) { // Catches other JwtException types (e.g., MalformedJwtException, SignatureException)
+            log.error("JWT Error: {}", e.getMessage());
+            setErrorResponse(response, HttpStatus.UNAUTHORIZED, "JWT Filter Error", e.getMessage());
+        } catch (TokenValidationException | TokenRevokedException e) {
+            // These are your custom exceptions, treat them similarly to JWT exceptions for authentication failures
+            log.error("Token Validation/Revocation Error: {}", e.getMessage());
+            setErrorResponse(response, HttpStatus.UNAUTHORIZED, "JWT Filter Error", e.getMessage());
         } catch (Exception e) {
-            log.error("Authentication error", e);
-            handleError(response, "Authentication failed", HttpServletResponse.SC_UNAUTHORIZED);
+            // Catch any other unexpected exceptions and return an internal server error
+            log.error("Unhandled Exception in JwtFilter: {}", e.getMessage(), e);
+            setErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, "Server Error", "An unexpected error occurred");
         }
+
     }
 
     private Optional<String> extractToken(HttpServletRequest request) {
@@ -101,16 +104,13 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = applicationContext
-                    .getBean(ViazUserDetailsService.class)
-                    .loadUserByUsername(username);
+            UserDetails userDetails = applicationContext.getBean(ViazUserDetailsService.class).loadUserByUsername(username);
 
             if (!jwtUtil.validateToken(token, userDetails)) {
                 throw new TokenValidationException("Invalid JWT token");
             }
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -118,10 +118,26 @@ public class JwtFilter extends OncePerRequestFilter {
         }
     }
 
-    private void handleError(HttpServletResponse response, String message, int status) throws IOException {
-        response.setStatus(status);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(String.format("{\"error\": \"%s\", \"timestamp\": \"%s\", \"status\": %d}",
-                message, java.time.LocalDateTime.now(), status));
+    /*    Different exception handling approach
+        @ExceptionHandler(TokenRevokedException.class)
+        public ResponseEntity<ApiErrorResponse> handleTokenRevokedException(TokenRevokedException ex) {
+            log.error("Token revoked: {}", ex.getMessage());
+
+            HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+            return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Token revoked", ex.getMessage()));
+        }
+    */
+    private void setErrorResponse(HttpServletResponse response, HttpStatus status, String error, String message) {
+        try {
+            response.setStatus(status.value());
+            response.setContentType("application/json");
+            // Use your existing ApiErrorResponse structure for consistency
+            ApiErrorResponse apiErrorResponse = ApiErrorResponse.of(status, error, message);
+            objectMapper.writeValue(response.getWriter(), apiErrorResponse);
+        } catch (IOException e) {
+            log.error("Error writing error response to client", e);
+        }
     }
+
 }
