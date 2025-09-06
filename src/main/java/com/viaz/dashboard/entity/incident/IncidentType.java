@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
-@Table(name = "charges")
+@Table(name = "incidents")
 @Entity
 public class IncidentType {
 
