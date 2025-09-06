@@ -1,15 +1,20 @@
 package com.viaz.dashboard.exception;
 
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
+import com.viaz.dashboard.exception.exceptions.TokenRevokedException;
 import com.viaz.dashboard.exception.exceptions.TokenValidationException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -22,54 +27,46 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(TokenValidationException.class)
-    public ResponseEntity<Map<String, Object>> handleTokenValidationException(TokenValidationException ex) {
-        log.error("Token validation error: {}", ex.getMessage());
 
-        Map<String, Object> response = createErrorResponse(
-                HttpStatus.UNAUTHORIZED,
-                "Token Validation Error",
-                ex.getMessage()
-        );
-
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingRequestCookieException(MissingRequestCookieException ex) {
+        log.error("Missing request cookie: {}", ex.getMessage());
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Missing Request Cookie", ex.getMessage()));
     }
 
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateKeyException(DuplicateKeyException ex) {
+        log.error("Duplicate key error: {}", ex.getMessage());
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Duplicate Key Error", ex.getMessage()));
+    }
+
+
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentialsException(BadCredentialsException ex) {
+    public ResponseEntity<ApiErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
         log.error("Authentication error: {}", ex.getMessage());
 
-        Map<String, Object> response = createErrorResponse(
-                HttpStatus.UNAUTHORIZED,
-                "Authentication Error",
-                ex.getMessage()
-        );
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
 
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Authentication Error", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalStateException(IllegalStateException ex) {
         log.error("Illegal state error: {}", ex.getMessage());
 
-        Map<String, Object> response = createErrorResponse(
-                HttpStatus.BAD_REQUEST,
-                "Illegal State Error",
-                ex.getMessage()
-        );
+        Map<String, Object> response = createErrorResponse(HttpStatus.BAD_REQUEST, "Illegal State Error", ex.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        log.error("Resource not found: {}", ex.getMessage());
+        log.error("Resource not found exception: {}", ex.getMessage());
 
-        Map<String, Object> response = createErrorResponse(
-                HttpStatus.NOT_FOUND,
-                "Resource Not Found",
-                ex.getMessage()
-        );
+        Map<String, Object> response = createErrorResponse(HttpStatus.NOT_FOUND, "Resource Not Found", ex.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
@@ -80,110 +77,84 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = HttpStatus.UNAUTHORIZED;
 
-        Map<String, Object> response = createErrorResponse(
-                status,
-                "Insufficient Authentication",
-                ex.getMessage()
-        );
+        Map<String, Object> response = createErrorResponse(status, "Insufficient Authentication", ex.getMessage());
 
         return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+    public ResponseEntity<ApiErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
 
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
-        Map<String, Object> response = createErrorResponse(
-                status,
-                "Server Error",
-                "An unexpected error occurred"
-        );
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Server Error", "An unexpected error occurred"));
+    }
 
-        return new ResponseEntity<>(response, status);
+    @ExceptionHandler({ExpiredJwtException.class, JwtException.class, TokenValidationException.class, TokenRevokedException.class})
+    public ResponseEntity<ApiErrorResponse> handleJWTFilterException(Exception ex) {
+        log.error("JWT filter error: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "JWT Filter Error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("Illegal argument error: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Illegal Argument", ex.getMessage()));
     }
 
     @ExceptionHandler(LockedException.class)
-    public ResponseEntity<Map<String, Object>> handleLockedException(LockedException ex) {
+    public ResponseEntity<ApiErrorResponse> handleLockedException(LockedException ex) {
         log.error("Account locked error: {}", ex.getMessage());
 
         HttpStatus status = HttpStatus.LOCKED;
 
-        Map<String, Object> response = createErrorResponse(
-                status,
-                "Account Locked",
-                ex.getMessage()
-        );
 
-        return new ResponseEntity<>(response, status);
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Account Locked", ex.getMessage()));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<Map<String, Object>> handleNoSuchElementException(NoSuchElementException ex) {
+    public ResponseEntity<ApiErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
         log.error("The element does not exist: {}", ex.getMessage());
 
         HttpStatus status = HttpStatus.NOT_FOUND;
 
-        Map<String, Object> response = createErrorResponse(
-                status,
-                "The element was not found.",
-                ex.getMessage()
-        );
-
-        return new ResponseEntity<>(response, status);
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "The element was not found.", ex.getMessage()));
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+    public ResponseEntity<ApiErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
         log.error("Authorization denied error: {}", ex.getMessage());
 
         HttpStatus status = HttpStatus.FORBIDDEN;
 
-        Map<String, Object> response = createErrorResponse(
-                status,
-                "Authorization Denied",
-                ex.getMessage()
-        );
-
-        return new ResponseEntity<>(response, status);
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Authorization Denied", ex.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        // You can inspect the cause of the exception to provide a more specific message
-        // For unique constraint violations, the cause often contains details.
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
 
         HttpStatus status = HttpStatus.CONFLICT;
 
         if (ex.getCause() != null && ex.getCause().getMessage() != null) {
             String causeMessage = ex.getCause().getMessage();
-            if (causeMessage.contains("duplicate key value violates unique constraint") ||
-                    causeMessage.contains("Unique index or primary key violation")) {
+            if (causeMessage.contains("duplicate key value violates unique constraint") || causeMessage.contains("Unique index or primary key violation")) {
 
                 if (causeMessage.contains("name")) {
-                    Map<String, Object> duplicateResponse = createErrorResponse(
-                            status,
-                            "Cannot save record with duplicate name. Please use a unique value.",
-                            "Error violating unique constraint."
-                    );
-                    return new ResponseEntity<>(duplicateResponse, status);
+                    return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Cannot save record with duplicate name. Please use a unique value.", "Error violating unique constraint."));
                 }
 
-                Map<String, Object> duplicateResponse = createErrorResponse(
-                        status,
-                        "The record you are trying to save already exists (e.g., duplicate name). Please use a unique value.",
-                        "Error violating unique constraint."
-                );
-                return new ResponseEntity<>(duplicateResponse, status);
+                return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "The record you are trying to save already exists (e.g., duplicate name). Please use a unique value.", "Error violating unique constraint."));
             }
         }
-        Map<String, Object> defaultResponse = createErrorResponse(
-                status,
-                "A data integrity violation occurred.",
-                "Error violating unique constraint."
-        );
-        return new ResponseEntity<>(defaultResponse, status); // 409 Conflict is appropriate for unique constraint violations
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "A data integrity violation occurred.", "Error violating unique constraint.")); // 409 Conflict is appropriate for unique constraint violations
     }
 
 
