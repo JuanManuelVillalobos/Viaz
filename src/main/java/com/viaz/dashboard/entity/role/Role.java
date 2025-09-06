@@ -1,5 +1,6 @@
 package com.viaz.dashboard.entity.role;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.viaz.dashboard.entity.permission.Permission;
 import com.viaz.dashboard.entity.user.ViazUser;
 import jakarta.persistence.*;
@@ -29,10 +30,8 @@ public class Role {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "display_name")
-    private String displayName;
-
     @ManyToMany(mappedBy = "roles")
+    @JsonBackReference
     private Set<ViazUser> users = new HashSet<>();
 
 
@@ -51,27 +50,18 @@ public class Role {
     @Column(name = "system_protected")
     private boolean systemProtected = false;
 
-
-    public Role(String name) {
-        this.name = name;
-        this.displayName = name;
-        this.permissions = new HashSet<>();
-    }
-
     public Role(String name, String description) {
         this.name = name;
         this.description = description;
-        this.displayName = name;
         this.permissions = new HashSet<>();
     }
 
-    public Role(String name, String description, String displayName) {
+    public Role(String name, String description, boolean cosmetic) {
         this.name = name;
         this.description = description;
-        this.displayName = displayName;
+        this.cosmetic = cosmetic;
         this.permissions = new HashSet<>();
     }
-
 
     public void addPermission(Permission permission) {
         this.permissions.add(permission);
