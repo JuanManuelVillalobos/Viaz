@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Slf4j
-@Order(4)
+@Order(5)
 @Component
 @RequiredArgsConstructor
 @Profile("dev")
