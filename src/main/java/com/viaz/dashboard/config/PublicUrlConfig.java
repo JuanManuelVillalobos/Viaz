@@ -1,12 +1,14 @@
 package com.viaz.dashboard.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Getter
 @Component
 public class PublicUrlConfig {
 
@@ -17,10 +19,6 @@ public class PublicUrlConfig {
         new AntPathRequestMatcher("/api/auth/set-password"),
         new AntPathRequestMatcher("/api/auth/refresh-token")
     );
-
-    public List<RequestMatcher> getPublicMatchers() {
-        return publicMatchers;
-    }
 
     public boolean isPublic(HttpServletRequest request) {
         return publicMatchers.stream().anyMatch(matcher -> matcher.matches(request))
