@@ -10,7 +10,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
-public class ChargeTypeService {
+public class ChargeService {
     private final ChargeTypeRepository chargeTypeRepository;
 
     public List<ChargeType> getChargeTypes() {
@@ -30,8 +30,7 @@ public class ChargeTypeService {
     }
 
     public ChargeType getChargeByIdOrThrow(@NonNull Long chargeId) {
-        return chargeTypeRepository.findById(chargeId)
-                .orElseThrow(() -> new ResourceNotFoundException("No charge with id " + chargeId));
+        return chargeTypeRepository.findById(chargeId).orElseThrow(() -> new ResourceNotFoundException("No charge with id " + chargeId));
     }
 
 }
