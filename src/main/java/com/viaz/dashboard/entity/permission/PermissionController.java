@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Set;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -16,10 +19,10 @@ public class PermissionController {
 
     private final PermissionService permissionService;
 
+    @PreAuthorize("@permissionEvaluatorImpl.hasAnyPermission(authentication, 'ROLES_ASSIGN', 'ROLES_WRITE')")
     @GetMapping("/get-permissions")
-    @PreAuthorize("@permissionEvaluator.hasAnyPermission(authentication, 'ROLE_ASSIGN', 'ROLE_WRITE')")
-    public String getPermissions(){
-        return permissionService.getAllPermissions().toString();
+    public List<String> getPermissions() {
+        return permissionService.getAllPermissions();
     }
 
 
