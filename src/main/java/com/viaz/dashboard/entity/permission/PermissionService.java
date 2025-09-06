@@ -12,8 +12,8 @@ public class PermissionService {
 
     private final PermissionRepository permissionRepository;
 
-    public List<Permission> getAllPermissions() {
-        return permissionRepository.findAll();
+    public List<String> getAllPermissions() {
+        return permissionRepository.findAll().stream().map(Permission::getName).toList();
     }
 
     public Optional<Permission> getPermissionByName(String name) {
