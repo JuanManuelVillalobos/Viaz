@@ -40,11 +40,6 @@ logging:
     org.springframework.mail: debug
 ###
 
-### JWT SECRET KEY
-jwt:
-  secret:
-    key: ${JWT_SECRET}
-###
 
 ### Default user after start
 default:
@@ -57,21 +52,4 @@ default:
 ### FrontUrl
 frontend:
   url: ${FRONTEND_URL}
-###
-
-### RATE LIMIT
-rate:
-  limit:
-    pass: false
-    capacity: ${RATE_LIMIT}
-    time: 1
-###
-
-### AWS
-aws:
-  region: ${AWS_REGION}
-  bucket:
-    main: S3Bucket
-  s3:
-    mock: dasas
 ###
