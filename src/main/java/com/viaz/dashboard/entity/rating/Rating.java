@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "ratings")
 @Entity
-
+@EntityListeners(AuditingEntityListener.class)
 public class Rating {
 
     @Id
@@ -33,8 +34,6 @@ public class Rating {
 
     @Column(name = "rating_observation")
     private String ratingObservation;
-
-
 
 //  Rating Statistics
     @CreatedDate
