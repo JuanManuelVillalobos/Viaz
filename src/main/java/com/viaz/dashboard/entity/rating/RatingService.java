@@ -15,21 +15,25 @@ public class RatingService {
     private final RatingRepository ratingRepository;
     private final ShipmentRepository shipmentRepository;
 
-    public ResponseEntity<String> createRating(@NonNull String viazId, @NonNull Integer rating, String observations) {
-        Shipment shipment = shipmentRepository.findByViazId(viazId);
+    public Rating saveRating(Rating rating) {
+        return ratingRepository.save(rating);
+    }
 
-        if (shipment == null) {
-            throw new ResourceNotFoundException("Shipment not found with viazId: " + viazId);
-        }
+    public Rating createRating(@NonNull Shipment shipment, @NonNull Integer customerServiceRating, @NonNull Integer shipmentRating, String observations) {
 
         Rating newRating = new Rating();
-        newRating.setShipmentRating(rating);
+//        Set Rating based on incidences
+        newRating.setShipmentRating(shipmentRating);
+
+//        Set Rating based on customer service
+        newRating.setCustomerServiceRating(customerServiceRating);
+
         newRating.setRatingObservation(observations);
+
         newRating.setShipment(shipment);
 
-        ratingRepository.save(newRating);
 
-        return ResponseEntity.ok("Rating created successfully for shipment: " + viazId + " with rating ID: " + newRating.getRatingId());
+        return ratingRepository.save(newRating);
     }
 
 }
