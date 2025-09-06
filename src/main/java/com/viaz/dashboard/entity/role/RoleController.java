@@ -1,6 +1,8 @@
 package com.viaz.dashboard.entity.role;
 
-import com.viaz.dashboard.entity.role.helpers.RoleCreationRequest;
+import com.viaz.dashboard.entity.role.helpers.RoleCreationRequestDTO;
+import com.viaz.dashboard.entity.role.helpers.RoleResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,37 +22,27 @@ public class RoleController {
 
     private final RoleService roleService;
 
-
+    @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'ROLES_WRITE')")
     @PostMapping("/create-role")
-    @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'ROLE_WRITE')") // Only roles with ROLES_WRITE permission can create roles
-    public ResponseEntity<Role> createRole(@RequestBody RoleCreationRequest request) {
-        try {
-            // Sanitize input to prevent XSS
-            String sanitizedName = HtmlUtils.htmlEscape(request.name());
-            String sanitizedDescription = HtmlUtils.htmlEscape(request.description());
-
-            Role newRole = roleService.createRole(sanitizedName, sanitizedDescription);
-            return new ResponseEntity<>(newRole, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT); // Or specific error response
-        }
+    // Only roles with ROLES_WRITE permission can create roles
+    public ResponseEntity<RoleResponseDTO> createRole(@Valid @RequestBody RoleCreationRequestDTO request) {
+        RoleResponseDTO newRole = roleService.convertToDTO(roleService.createRole(request));
+        return new ResponseEntity<>(newRole, HttpStatus.CREATED);
     }
 
-
+    @PreAuthorize("@permissionEvaluator.hasPermission(authentication,'ROLES_READ')")
     @GetMapping("/get-all-roles")
-    @PreAuthorize("@permissionEvaluator.hasPermission(authentication,'ROLE_READ')")
-    public List<Role> getAllRoles() {
+    public List<RoleResponseDTO> getAllRoles() {
         return (roleService.getAllRoles());
     }
 
-
+    @PreAuthorize("@permissionEvaluator.hasPermission(authentication, 'ROLES_WRITE')")
     @PostMapping("/add-permision-to-role/{roleName}/{permision}")
-    @PreAuthorize("@permissionEvaluator.hasAllPermissions(authentication, 'ROLE_WRITE', 'PERMISSIONS_WRITE')")
-    public ResponseEntity<Map<String,Object>> addPermissionToRole(@PathVariable String roleName, @PathVariable String permision) {
+    public ResponseEntity<Map<String, Object>> addPermissionToRole(@PathVariable String roleName, @PathVariable String permision) {
         roleService.addPermissionToRole(roleName, permision);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Permission added successfully to role " + roleName);
+        response.put("message", "Permission added successfully to role " + HtmlUtils.htmlEscape(roleName));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
