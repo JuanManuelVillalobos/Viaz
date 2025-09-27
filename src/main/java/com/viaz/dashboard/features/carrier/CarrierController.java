@@ -1,14 +1,13 @@
-package com.viaz.dashboard.entity.carrier;
+package com.viaz.dashboard.features.carrier;
 
-import com.viaz.dashboard.entity.carrier.helpers.CarrierDetailsDTO;
-import com.viaz.dashboard.entity.carrier.helpers.CarrierRequestDTO;
-import com.viaz.dashboard.entity.carrier.helpers.CarrierResponseDTO;
+import com.viaz.dashboard.features.carrier.dto.CarrierDetailsDTO;
+import com.viaz.dashboard.features.carrier.dto.CarrierRequestDTO;
+import com.viaz.dashboard.features.carrier.dto.CarrierResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.HtmlUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,22 +46,26 @@ public class CarrierController {
 
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication,'CARRIER_WRITE')")
-    @PostMapping("/update-carrier/{carrierId}/")
-    public ResponseEntity<Map<Object,String>> UpdateCarrier(@PathVariable Long carrierId, CarrierRequestDTO carrier) {
+    @PatchMapping("/update-carrier/{carrierId}")
+    public CarrierDetailsDTO UpdateCarrier(@PathVariable Long carrierId, @RequestBody Map<String, Object> updates) {
+        return carrierService.updateCarrier(carrierId, updates);
 
-        carrierService.updateCarrier(carrierId, carrier);
+    }
 
+    @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'CARRIER_DELETE')")
+    @DeleteMapping("/delete-carrier/{carrierId}")
+    public ResponseEntity<Map<String, Object>> deleteCarrier(@PathVariable Long carrierId) {
+        carrierService.deleteCarrier(carrierId);
 
-        Map<Object, String> response = new HashMap<>();
-        response.put("message", "Carrier updated successfully");
-
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Carrier deleted successfully ");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<Map<Object, String>> getCarrierRatingStatistics() {
 
-
-        return null;
-    }
+//    public ResponseEntity<Map<Object, String>> getCarrierRatingStatistics() {
+//
+//        return null;
+//    }
 
 }
