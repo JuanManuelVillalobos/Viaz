@@ -1,7 +1,7 @@
 package com.viaz.dashboard.initializers;
 
-import com.viaz.dashboard.entity.carrier.CarrierService;
-import com.viaz.dashboard.entity.carrier.helpers.CarrierRequestDTO;
+import com.viaz.dashboard.features.carrier.CarrierService;
+import com.viaz.dashboard.features.carrier.dto.CarrierRequestDTO;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +22,15 @@ public class CarrierInitializer {
 
     private static final List<String> DEFAULT_CARRIERS = List.of(
             "Transportes del Norte",
-            "Fletes y Mudanzas Express",
-            "Logística Integral MX",
-            "Carga Segura",
-            "Autotransportes del Pacífico",
-            "Rapid Freight",
-            "Movil Cargo",
-            "Transmex",
-            "LogiTrack",
-            "Global Haulers"
+            "Fletes y Mudanzas Express"
+//            "Logística Integral MX",
+//            "Carga Segura",
+//            "Autotransportes del Pacífico",
+//            "Rapid Freight",
+//            "Movil Cargo",
+//            "Transmex",
+//            "LogiTrack",
+//            "Global Haulers"
     );
 
     @PostConstruct
