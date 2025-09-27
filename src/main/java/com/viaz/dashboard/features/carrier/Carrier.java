@@ -1,6 +1,6 @@
-package com.viaz.dashboard.entity.carrier;
+package com.viaz.dashboard.features.carrier;
 
-import com.viaz.dashboard.entity.user.ViazUser;
+import com.viaz.dashboard.features.user.ViazUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -10,9 +10,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-@ToString
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -45,11 +44,11 @@ public class Carrier {
     //    Carrier Statistics
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    private Instant createdDate;
 
     @LastModifiedDate
     @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
+    private Instant lastModifiedDate;
 
     @CreatedBy
     @ManyToOne(fetch = FetchType.LAZY)
@@ -66,5 +65,10 @@ public class Carrier {
         this.rfc = rfc;
         this.razonSocial = razonSocial;
         this.caat = caat;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Carrier %s", name);
     }
 }
