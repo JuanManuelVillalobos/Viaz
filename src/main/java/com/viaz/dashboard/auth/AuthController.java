@@ -1,11 +1,11 @@
 package com.viaz.dashboard.auth;
 
-import com.viaz.dashboard.auth.helper.LoginRequest;
-import com.viaz.dashboard.auth.helper.SetPassword;
-import com.viaz.dashboard.auth.helper.UserAuthResponse;
+import com.viaz.dashboard.auth.dto.LoginRequestDTO;
+import com.viaz.dashboard.auth.dto.SetPasswordDTO;
+import com.viaz.dashboard.auth.dto.UserAuthResponseDTO;
 import com.viaz.dashboard.jwt.Token;
-import com.viaz.dashboard.entity.user.ViazUser;
-import com.viaz.dashboard.entity.user.helpers.ViazUserResponseDTO;
+import com.viaz.dashboard.features.user.ViazUser;
+import com.viaz.dashboard.features.user.dto.ViazUserResponseDTO;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserAuthResponse> getCurrentUserAuth(Authentication authentication){
+    public ResponseEntity<UserAuthResponseDTO> getCurrentUserAuth(Authentication authentication){
         return authService.getCurrentUserAuth(authentication);
     }
 
@@ -37,7 +37,7 @@ public class AuthController {
     }
 
     @PostMapping("/set-password")
-    public ViazUserResponseDTO createUser(@RequestBody SetPassword request, @RequestParam String email, @RequestParam String token) throws Exception {
+    public ViazUserResponseDTO createUser(@RequestBody SetPasswordDTO request, @RequestParam String email, @RequestParam String token) throws Exception {
         return authService.changePassword(email,request,token);
     }
 
@@ -48,7 +48,7 @@ public class AuthController {
 
     //    Login User
     @PostMapping("/login")
-    public Token verify(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public Token verify(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
         return authService.login(request,response);
     }
 
