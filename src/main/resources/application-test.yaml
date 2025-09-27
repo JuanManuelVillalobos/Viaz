@@ -1,0 +1,18 @@
+### Spring
+spring:
+  ### DATABASE
+  datasource:
+    url: jdbc:postgresql://localhost:5432/viaz_production
+    username:
+    password:
+  jpa:
+    properties:
+      hibernate:
+        dialect:
+          org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  ###
+###
