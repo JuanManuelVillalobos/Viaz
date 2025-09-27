@@ -12,7 +12,8 @@ spring:
            org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-      ddl-auto: update
+#      TODO CHANGE TO VERIFY FOR PRODUCTION
+      ddl-auto: create-drop
     show-sql: false
   ###
   ### EMAIL SERVICE
