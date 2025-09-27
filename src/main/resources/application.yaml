@@ -4,10 +4,7 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  codec:
-    max-in-memory-size: 10MB
-
-####
+  ####
 
   ### CACHE
   cache:
@@ -15,6 +12,14 @@ spring:
     caffeine:
       spec: maximumSize=500,expireAfterWrite=60m
 
+  ###
+
+
+  ### JACKSON
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
   ###
 
 
@@ -47,6 +52,9 @@ spring:
           auth: true
           starttls.enable: true
   ###
+  http:
+    codecs:
+      max-in-memory-size: 10MB
 
 
 ####
@@ -58,7 +66,7 @@ server:
       cookie:
         http-only: true
         secure: true
-#   TODO check if url is secure, otherwise the cookie will not be sent
+  #   TODO check if url is secure, otherwise the cookie will not be sent
   error:
     include-message: always
 #    UNCOMMENT ADDRESS WHEN WANTING TO EXPOSE TO LAN
@@ -66,6 +74,9 @@ server:
 logging:
   level:
     org.springframework.mail: debug
+    org.springframework.web.socket: debug
+    org.springframework.messaging: debug
+
   ###
 
 ### JWT SECRET KEY
@@ -74,10 +85,11 @@ jwt:
     key: ${JWT_SECRET}
 ###
 
-### ENCRYPTION KEY
-encryption:
-  key: ${ENCRYPTION_KEY}
-
+### RATING WEIGHTS
+rating:
+  weight:
+    customerService: ${CUSTOMER_SERVICE_RATING_WEIGHT:0.5}
+    shipment: ${SHIPMENT_RATING_WEIGHT:0.5}
 ###
 
 ### Default user after start
@@ -92,6 +104,10 @@ default:
 frontend:
   url: ${FRONTEND_URL}
 ###
+
+### Viaz ID start
+migration:
+  viazIdStartNumber: ${VIAZ_ID_START_NUMBER}
 
 ### RATE LIMIT
 rate:
