@@ -1,26 +1,25 @@
 package com.viaz.dashboard.auth;
 
-import com.viaz.dashboard.auth.helper.LoginRequest;
-import com.viaz.dashboard.auth.helper.SetPassword;
-import com.viaz.dashboard.auth.helper.UserAuthResponse;
+import com.viaz.dashboard.auth.dto.LoginRequestDTO;
+import com.viaz.dashboard.auth.dto.SetPasswordDTO;
+import com.viaz.dashboard.auth.dto.UserAuthResponseDTO;
 import com.viaz.dashboard.email.EmailService;
-import com.viaz.dashboard.entity.role.Role;
-import com.viaz.dashboard.entity.user.userDetails.ViazUserDetails;
+import com.viaz.dashboard.features.role.Role;
+import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.initializers.lists.PermissionList;
 import com.viaz.dashboard.jwt.JwtUtil;
 import com.viaz.dashboard.jwt.Token;
 import com.viaz.dashboard.jwt.blacklist.BlacklistService;
-import com.viaz.dashboard.entity.user.UserService;
-import com.viaz.dashboard.entity.user.ViazUser;
-import com.viaz.dashboard.entity.user.helpers.ViazUserResponseDTO;
-import com.viaz.dashboard.entity.user.userDetails.ViazUserDetailsService;
+import com.viaz.dashboard.features.user.UserService;
+import com.viaz.dashboard.features.user.ViazUser;
+import com.viaz.dashboard.features.user.dto.ViazUserResponseDTO;
+import com.viaz.dashboard.features.user.userDetails.ViazUserDetailsService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +29,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -57,14 +57,14 @@ public class AuthService {
     }
 
 
-    public ResponseEntity<UserAuthResponse> getCurrentUserAuth(Authentication authentication) {
+    public ResponseEntity<UserAuthResponseDTO> getCurrentUserAuth(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         ViazUserDetails userDetails = (ViazUserDetails) authentication.getPrincipal();
 
-        UserAuthResponse response = UserAuthResponse.builder()
+        UserAuthResponseDTO response = UserAuthResponseDTO.builder()
                 .user(mapToUserInfo(userDetails))
                 .effectivePermissions(getEffectivePermissions(userDetails))
                 .build();
@@ -73,7 +73,7 @@ public class AuthService {
     }
 
     // Helper methods
-    private UserAuthResponse.UserInfo mapToUserInfo(ViazUserDetails userDetails) {
+    private UserAuthResponseDTO.UserInfo mapToUserInfo(ViazUserDetails userDetails) {
         var user = userDetails.viazUser();
 
         List<String> roleNames = user.getRoles().stream()
@@ -81,7 +81,7 @@ public class AuthService {
                 .collect(Collectors.toList());
 
 
-        return UserAuthResponse.UserInfo.builder()
+        return UserAuthResponseDTO.UserInfo.builder()
                 .userId(user.getUserId().toString())
                 .email(user.getEmail())
                 .username(user.getUsername())
@@ -125,14 +125,14 @@ public class AuthService {
 
 
     public ViazUser register(ViazUserResponseDTO viazUser) throws MessagingException {
-        ViazUser user = new ViazUser(viazUser.username(), viazUser.email());
+        ViazUser user = new ViazUser(viazUser.username(), viazUser.email().toLowerCase());
         user = userService.createUnValidatedUser(user, viazUser.roles());
         emailService.sendInvitationEmail(viazUser.email());
         return user;
     }
 
-    public Token login(LoginRequest request, HttpServletResponse response) {
-        String identifier = userService.getUsernameByEmail(request.email());
+    public Token login(LoginRequestDTO request, HttpServletResponse response) {
+        String identifier = userService.getUsernameByEmailIgnoreCase(request.email().toLowerCase());
         String password = request.password();
 
         try {
@@ -171,7 +171,7 @@ public class AuthService {
     }
 
     public void logout(String refreshToken) {
-        LocalDateTime expirationDate = LocalDateTime.now().plusDays(30); // 30 days
+        Instant expirationDate = Instant.now().plus(30, ChronoUnit.DAYS); // 30 days
         blacklistService.addToBlacklist(refreshToken, expirationDate);
     }
 
@@ -193,7 +193,7 @@ public class AuthService {
         return new Token(newAccessToken, userDetails.getUsername());
     }
 
-    public ViazUserResponseDTO changePassword(String email, SetPassword request, String token) throws Exception {
+    public ViazUserResponseDTO changePassword(String email, SetPasswordDTO request, String token) throws Exception {
         // Check if the token is valid for the given email
         String storedToken = emailService.getToken(email);
         if (storedToken != null && storedToken.equals(token)) {
@@ -207,7 +207,7 @@ public class AuthService {
         throw new BadCredentialsException("Token is invalid"); // Token is invalid or does not match
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+
     public void deleteExpiredInvites() {
         userService.deleteUsersWithNullPassword();
     }
