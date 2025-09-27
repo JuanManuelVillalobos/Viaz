@@ -1,10 +1,7 @@
-package com.viaz.dashboard.entity.carrier.helpers;
+package com.viaz.dashboard.features.carrier.dto;
 
-import com.viaz.dashboard.entity.carrier.Carrier;
-import com.viaz.dashboard.entity.user.helpers.UserSummaryDTO;
-import lombok.Data;
-
-import java.time.LocalDateTime;
+import com.viaz.dashboard.features.carrier.Carrier;
+import com.viaz.dashboard.features.user.dto.UserSummaryDTO;
 
 public record CarrierDetailsDTO(
         Long carrierId,
