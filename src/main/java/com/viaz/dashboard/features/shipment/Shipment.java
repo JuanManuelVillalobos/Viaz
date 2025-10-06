@@ -1,11 +1,10 @@
-package com.viaz.dashboard.entity.shipment;
+package com.viaz.dashboard.features.shipment;
 
-import com.viaz.dashboard.entity.carrier.Carrier;
-import com.viaz.dashboard.entity.incident.IncidentType;
-import com.viaz.dashboard.entity.rating.Rating;
-import com.viaz.dashboard.entity.shipment.charge.ShipmentCharge;
-import com.viaz.dashboard.entity.shipment.incident.ShipmentIncident;
-import com.viaz.dashboard.entity.user.ViazUser;
+import com.viaz.dashboard.features.carrier.Carrier;
+import com.viaz.dashboard.features.rating.Rating;
+import com.viaz.dashboard.features.shipment.charge.ShipmentCharge;
+import com.viaz.dashboard.features.shipment.incident.ShipmentIncident;
+import com.viaz.dashboard.features.user.ViazUser;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -16,9 +15,12 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @ToString
@@ -33,8 +35,22 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 public class Shipment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "base_viaz_id")
+    private String baseViazId;
+
     @Column(name = "viaz_id", nullable = false, unique = true)
-    private String viazId;
+    private String fullViazId;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "base_shipment_id")
+    private Shipment baseShipment;
+
+    @OneToMany(mappedBy = "baseShipment")
+    private List<Shipment> variants = new ArrayList<>();
 
     // These are used to get the ViazID
     @Column(name = "year")
@@ -47,7 +63,10 @@ public class Shipment {
     private String transportMethod;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_service_agent", referencedColumnName = "user_id")
+    @JoinColumn(name = "customer_service_agent",
+            referencedColumnName = "user_id"
+    )
+    @ToString.Exclude
     private ViazUser customerServiceAgent;
 
     @Column(name = "type_of_service")
@@ -80,11 +99,13 @@ public class Shipment {
     private LocalDateTime shipmentDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transport", referencedColumnName = "carrier_id")
+    @JoinColumn(name = "transport",
+            referencedColumnName = "carrier_id"
+    )
     private Carrier transport;
 
-    @Column(name = "operator")
-    private String operator;
+    @Column(name = "foreign_reference")
+    private String foreignReference;
 
     @Column(name = "terminal")
     private String terminal;
@@ -126,10 +147,14 @@ public class Shipment {
     @Column(name = "cleaning_patio")
     private String cleaningPatio;
 
-    //    Fecha de Vacío
-    @Column(name = "cleaning_date")
+
+    @Column(name = "has_cleaning_appointment")
+    private Boolean hasCleaningAppointment;
+
+    //    Fecha de Cita de Vacío
+    @Column(name = "cleaning_appointment_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime cleaningDate;
+    private LocalDateTime cleaningAppointmentDate;
 
     @Column(name = "clean_arrival_date")
     private LocalDate cleanArrivalDate;
@@ -146,9 +171,11 @@ public class Shipment {
 
     //    Shipment Data
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private Set<ShipmentIncident> incidents = new HashSet<>();
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private Set<ShipmentCharge> charges = new HashSet<>();
 
     @OneToOne
@@ -162,11 +189,11 @@ public class Shipment {
     //    Shipment Statistics
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    private Instant createdDate;
 
     @LastModifiedDate
     @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
+    private Instant lastModifiedDate;
 
     @CreatedBy
     @ManyToOne(fetch = FetchType.LAZY)
@@ -178,11 +205,26 @@ public class Shipment {
     @JoinColumn(name = "last_modified_by_user_id")
     private ViazUser lastModifiedBy;
 
+    @Column(name = "deleted")
+    private boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "deleted_by_user_id")
+    private ViazUser deletedByUserId;
+
+
+    @Version
+    @Column(name = "version")
+    private Long version;
+
 
     @PrePersist
     public void generateId() {
-        if (viazId == null) {
-            this.viazId = "VZ-" + this.year + "-" + String.format("%03d", this.sequence);
+        if (fullViazId == null) {
+            this.fullViazId = "VZ-" + this.year + "-" + String.format("%03d", this.sequence);
         }
         this.files = 0;
     }
@@ -208,5 +250,10 @@ public class Shipment {
     public void close() {
         this.open = false;
     }
+
+    public void markModified() {
+        this.observations = (this.observations == null ? "" : this.observations) + " ";
+    }
+
 
 }
