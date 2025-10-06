@@ -1,16 +1,16 @@
-package com.viaz.dashboard.entity.shipment.charge;
+package com.viaz.dashboard.features.shipment.charge;
 
-import com.viaz.dashboard.entity.charge.ChargeType;
-import com.viaz.dashboard.entity.charge.ChargeType;
-import com.viaz.dashboard.entity.shipment.Shipment;
-import com.viaz.dashboard.initializers.lists.ChargeList;
+import com.viaz.dashboard.features.charge.ChargeType;
+import com.viaz.dashboard.features.shipment.Shipment;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Entity
 @Table(name = "shipment_charges")
+@EqualsAndHashCode(of = {"shipmentChargeId"})
 @EntityListeners(AuditingEntityListener.class)
 public class ShipmentCharge {
 
@@ -38,7 +39,7 @@ public class ShipmentCharge {
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime occurredAt;
+    private Instant occurredAt;
 
     public ShipmentCharge(Shipment shipment, ChargeType chargeType, String comment) {
         this.shipment = shipment;
