@@ -1,5 +1,13 @@
 ### Spring
 spring:
+
+  #### FLYWAY
+  flyway:
+    url: jdbc:postgresql://localhost:5432/viaz_production
+    user: postgres
+    baseline-on-migrate: true
+  ####
+
   ### DATABASE
   datasource:
     url: jdbc:postgresql://localhost:5432/viaz_production
@@ -12,7 +20,7 @@ spring:
           org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
   ###
 ###
