@@ -1,4 +1,4 @@
-package com.viaz.dashboard.entity.carrier.helpers;
+package com.viaz.dashboard.features.carrier.dto;
 
 import lombok.NonNull;
 
