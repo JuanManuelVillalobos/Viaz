@@ -1,5 +1,13 @@
 #### SPRING
 spring:
+
+  #### FLYWAY
+  flyway:
+    url: jdbc:postgresql://localhost:5432/viaz
+    user: postgres
+    baseline-on-migrate: true
+  ####
+
   servlet:
     multipart:
       max-file-size: 10MB
