@@ -1,13 +1,12 @@
 package com.viaz.dashboard.filters;
 
-import com.viaz.dashboard.entity.user.userDetails.ViazUserDetails;
+import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
