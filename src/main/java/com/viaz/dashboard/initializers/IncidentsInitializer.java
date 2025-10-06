@@ -1,6 +1,6 @@
 package com.viaz.dashboard.initializers;
 
-import com.viaz.dashboard.entity.incident.IncidentService;
+import com.viaz.dashboard.features.incident.IncidentService;
 import com.viaz.dashboard.initializers.lists.IncidentList;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +22,13 @@ public class IncidentsInitializer {
 
     private void createDefaultIncidents() {
         for (IncidentList incident : IncidentList.values()) {
-            createPermissionIfNotExists(incident.getName());
+            createIncidentIfNotExists(incident.getName(), incident.getPenalty(), incident.getTypeOfEntityRelation());
         }
     }
 
-    private void createPermissionIfNotExists(String name) {
+    private void createIncidentIfNotExists(String name, double penalty, String typeOfEntityRelation) {
         if (incidentService.getIncidentByName(name).isEmpty()) {
-            incidentService.createIncidentOrThrow(name);
+            incidentService.createIncidentOrThrow(name, penalty, typeOfEntityRelation);
         }
     }
 }
