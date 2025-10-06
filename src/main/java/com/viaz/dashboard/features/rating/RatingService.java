@@ -1,11 +1,10 @@
-package com.viaz.dashboard.entity.rating;
+package com.viaz.dashboard.features.rating;
 
-import com.viaz.dashboard.entity.shipment.Shipment;
-import com.viaz.dashboard.entity.shipment.ShipmentRepository;
-import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
+import com.viaz.dashboard.features.shipment.Shipment;
+import com.viaz.dashboard.features.shipment.ShipmentRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -19,7 +18,8 @@ public class RatingService {
         return ratingRepository.save(rating);
     }
 
-    public Rating createRating(@NonNull Shipment shipment, @NonNull Integer customerServiceRating, @NonNull Integer shipmentRating, String observations) {
+    @CacheEvict(value = "monthlyRatings", allEntries = true)
+    public Rating createRating(@NonNull Shipment shipment, @NonNull Double customerServiceRating, @NonNull Double shipmentRating, String observations) {
 
         Rating newRating = new Rating();
 //        Set Rating based on incidences
@@ -31,6 +31,8 @@ public class RatingService {
         newRating.setRatingObservation(observations);
 
         newRating.setShipment(shipment);
+
+        newRating.setCarrier(shipment.getTransport());
 
 
         return ratingRepository.save(newRating);
