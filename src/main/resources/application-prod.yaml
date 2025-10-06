@@ -1,5 +1,14 @@
 #### SPRING
 spring:
+
+  #### FLYWAY
+  flyway:
+    url: jdbc:postgresql://${DATABASE_URL}:5432/postgres
+    user: ViazDatabase
+    password: ${VIAZ_DATABASE_PASSWORD}
+    baseline-on-migrate: true
+  ####
+
 ### DATABASE
   datasource:
     url: jdbc:postgresql://${DATABASE_URL}:5432/postgres
@@ -12,8 +21,7 @@ spring:
            org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-#      TODO CHANGE TO VERIFY FOR PRODUCTION
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: false
   ###
   ### EMAIL SERVICE
