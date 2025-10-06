@@ -1,30 +1,36 @@
 package com.viaz.dashboard.initializers;
 
-import com.viaz.dashboard.entity.carrier.CarrierService;
-import com.viaz.dashboard.entity.carrier.helpers.CarrierResponseDTO;
-import com.viaz.dashboard.entity.shipment.ShipmentService;
-import com.viaz.dashboard.entity.shipment.helpers.ShipmentRequestDTO;
-import com.viaz.dashboard.entity.user.UserService;
-import com.viaz.dashboard.entity.user.helpers.UserSummaryDTO;
-import jakarta.annotation.PostConstruct;
+import com.viaz.dashboard.features.carrier.CarrierService;
+import com.viaz.dashboard.features.carrier.dto.CarrierResponseDTO;
+import com.viaz.dashboard.features.charge.ChargeService;
+import com.viaz.dashboard.features.charge.ChargeType;
+import com.viaz.dashboard.features.incident.IncidentService;
+import com.viaz.dashboard.features.incident.IncidentType;
+import com.viaz.dashboard.features.rating.RatingRepository;
+import com.viaz.dashboard.features.shipment.ShipmentRepository;
+import com.viaz.dashboard.features.shipment.ShipmentService;
+import com.viaz.dashboard.features.shipment.dto.ShipmentRequestDTO;
+import com.viaz.dashboard.features.user.UserService;
+import com.viaz.dashboard.features.user.dto.UserSummaryDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Random;
 
 import static java.lang.Math.max;
 
 @Slf4j
-@Order(5)
+@Order(6)
 @Component
 @RequiredArgsConstructor
+@Profile("dev")
 public class ShipmentInitializer implements CommandLineRunner {
 
     private final ShipmentService shipmentService;
@@ -33,7 +39,7 @@ public class ShipmentInitializer implements CommandLineRunner {
     private final Random random = new Random();
 
     // Dropdown options based on your selects
-    private static final List<String> TRANSPORT_METHODS = List.of("Terrestre", "Marítimo");
+    private static final List<String> TRANSPORT_METHODS = List.of("terrestre", "maritimo");
     private static final List<String> TYPE_OF_SERVICES = List.of("Full", "Sencillo");
     private static final List<String> STATUSES = List.of(
             "Información Pendiente", "Folio Pendiente", "Maniobras Pendientes",
@@ -49,14 +55,20 @@ public class ShipmentInitializer implements CommandLineRunner {
     private static final List<String> CLEANING_ORDERS = List.of("Solicitada", "Enviada", "Pendiente", "Completada");
     private static final List<String> CLEANING_PATIOS = List.of("SSA", "TIMSA", "CIMA", "OCUPA", "ISL", "CISE", "Otro");
     private final UserService userService;
+    private final ShipmentRepository shipmentRepository;
+    private final IncidentService incidentService;
+    private final ChargeService chargeService;
+    private final RatingRepository ratingRepository;
 
     @Override
     @Transactional
     public void run(String... args) {
         log.info("Initializing default shipments...");
 
-        List<String> customerAgents = userService.getUsersByRole("Customer Service").stream().map(UserSummaryDTO::username).toList();
+        List<String> customerAgents = userService.getUsersByRole("Client Service").stream().map(UserSummaryDTO::username).toList();
         List<String> carriers = carrierService.getCarriers().stream().map(CarrierResponseDTO::name).toList();
+        List<IncidentType> incidentTypes = incidentService.getIncidentTypes();
+        List<ChargeType> chargeTypes = chargeService.getChargeTypes();
 
 
         if (customerAgents.isEmpty() || carriers.isEmpty()) {
@@ -64,45 +76,116 @@ public class ShipmentInitializer implements CommandLineRunner {
             return;
         }
 
-        for (int i = 1; i <= 30; i++) {
+        int totalShipments = 30;
+        int year = 2025;
+        Instant startDate = ZonedDateTime.of(
+                2025, 1, 1, 0, 0, 0, 0,
+                ZoneOffset.UTC
+        ).toInstant();
+        Instant endDate = Instant.now();
+
+        for (int sequence = 1; sequence <= totalShipments; sequence++) {
+            Instant createdDate = getCreatedDateBySequence(sequence, totalShipments, startDate, endDate);
+
             ShipmentRequestDTO shipment = new ShipmentRequestDTO(
                     randomFrom(TRANSPORT_METHODS),
                     randomFrom(customerAgents),
                     randomFrom(TYPE_OF_SERVICES),
-                    "DACHSER CATHERINE",                       // fixed client example
+                    "DACHSER CATHERINE",
                     "Colima, Manzanillo",
-                    "Customs Agent " + i,                      // dummy customs agent name
+                    "Customs Agent " + sequence,
                     "Guadalajara, Jalisco",
                     randomFrom(STATUSES),
-                    "OOLU" + (100000 + i),                     // container like OOLU0516360 pattern
+                    "OOLU" + (100000 + sequence),
                     randomFrom(CONTAINER_TYPES),
                     LocalDateTime.of(2025, 2, 1, 0, 0),
                     randomFrom(carriers),
-                    "Operator " + i,
-                    "Terminal " + i,
-                    i % 2 == 0,
-                    i % 3 == 0,
-                    i % 4 == 0,
-                    i % 5 == 0,
-                    i % 6 == 0,
-                    LocalDate.of(2025, 2, 1).minusDays(i),
-                    LocalDateTime.now().plusDays(i),
-                    LocalDateTime.now().plusDays(i + 1),
+                    "Reference " + sequence,
+                    "Terminal " + sequence,
+                    sequence % 2 == 0,
+                    sequence % 3 == 0,
+                    sequence % 4 == 0,
+                    sequence % 5 == 0,
+                    sequence % 6 == 0,
+                    LocalDate.of(2025, 2, 1).minusDays(sequence),
+                    LocalDateTime.now().plusDays(sequence),
+                    LocalDateTime.now().plusDays(sequence + 1),
                     randomFrom(CLEANING_ORDERS),
                     randomFrom(POD_STATUSES),
                     randomFrom(CLEANING_PATIOS),
-                    LocalDateTime.now().plusDays(i + 2),
-                    LocalDate.now().plusDays(i + 2),
+                    true,
+                    LocalDateTime.now().plusDays(sequence + 2),
+                    LocalDate.now().plusDays(sequence + 2),
                     randomFrom(EIR_STATUSES),
-                    "Observation shipment " + i,
-                    random.nextInt(10)
+                    "Observation shipment " + sequence
             );
 
-            shipmentService.createShipment(shipment);
+            // Create and retrieve the viazId
+            var createdShipment = shipmentService.createShipment(shipment);
+            String viazId = createdShipment.fullViazId();
+
+            shipmentRepository.updateCreatedDate(viazId, createdDate);
+
+            // Add 0-n incidents
+            if (!incidentTypes.isEmpty()) {
+                int incidentCount;
+                int roll = random.nextInt(10); // 0–9
+
+                if (roll < 7) { // 70% chance
+                    incidentCount = 0;
+                } else if (roll < 9) { // 20% chance
+                    incidentCount = 1;
+                } else { // 10% chance
+                    incidentCount = 2;
+                }
+
+                for (int i = 0; i < incidentCount; i++) {
+                    IncidentType randomIncident = randomFrom(incidentTypes);
+                    shipmentService.addIncidentToShipment(viazId, randomIncident.getIncidentId(), "Test incident");
+                }
+            }
+
+            // Add 0-n charges
+            if (!chargeTypes.isEmpty()) {
+                int chargeCount;
+                int roll = random.nextInt(10); // 0–9
+
+                if (roll < 7) { // 70% chance
+                    chargeCount = 0;
+                } else if (roll < 9) { // 20% chance
+                    chargeCount = 1;
+                } else { // 10% chance
+                    chargeCount = 2;
+                }
+
+
+                for (int i = 0; i < chargeCount; i++) {
+                    ChargeType randomCharge = randomFrom(chargeTypes);
+                    shipmentService.addChargeToShipment(viazId, randomCharge.getChargeId(), "Test charge");
+                }
+            }
+
+            // Close some shipments
+            if (sequence % 3 == 0) { // Close every 3rd shipment, has rating from 1-10
+//            if (true) {
+                String closedShipmentViazID = shipmentService.closeShipment(viazId, random.nextInt(1, 11), "Closed for testing");
+                ratingRepository.updateCreatedDate(shipmentService.getShipmentById(closedShipmentViazID).getRating().getRatingId(), createdDate);
+            }
+
         }
+
 
         log.info("Default shipments initialized.");
     }
+
+    private Instant getCreatedDateBySequence(int sequence, int totalCount, Instant start, Instant end) {
+        long startEpoch = start.getEpochSecond();
+        long endEpoch = end.getEpochSecond();
+        long interpolatedEpoch = startEpoch + ((endEpoch - startEpoch) * (sequence - 1)) / Math.max(1, totalCount - 1);
+
+        return Instant.ofEpochSecond(interpolatedEpoch);
+    }
+
 
     private <T> T randomFrom(List<T> list) {
         return list.get(random.nextInt(list.size()));
