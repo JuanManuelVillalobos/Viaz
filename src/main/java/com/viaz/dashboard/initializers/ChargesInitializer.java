@@ -1,6 +1,6 @@
 package com.viaz.dashboard.initializers;
 
-import com.viaz.dashboard.entity.charge.ChargeService;
+import com.viaz.dashboard.features.charge.ChargeService;
 import com.viaz.dashboard.initializers.lists.ChargeList;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +23,13 @@ public class ChargesInitializer {
 
     private void createDefaultCharges() {
         for (ChargeList charge : ChargeList.values()) {
-            createPermissionIfNotExists(charge.getName());
+            createPermissionIfNotExists(charge.getName(), charge.getPenalty());
         }
     }
 
-    private void createPermissionIfNotExists(String name) {
+    private void createPermissionIfNotExists(String name, double penalty) {
         if (chargeService.getChargeByName(name).isEmpty()) {
-            chargeService.createChargeOrThrow(name);
+            chargeService.createChargeOrThrow(name, penalty);
         }
     }
 }
