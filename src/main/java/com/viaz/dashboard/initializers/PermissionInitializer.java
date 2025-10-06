@@ -1,14 +1,16 @@
 package com.viaz.dashboard.initializers;
 
-import com.viaz.dashboard.entity.permission.PermissionService;
-import com.viaz.dashboard.entity.role.Role;
-import com.viaz.dashboard.entity.role.RoleService;
-import com.viaz.dashboard.entity.role.helpers.RoleCreationRequestDTO;
-import com.viaz.dashboard.entity.shipment.idGenerator.ShipmentIdGeneratorService;
+import com.viaz.dashboard.features.permission.PermissionService;
+import com.viaz.dashboard.features.role.Role;
+import com.viaz.dashboard.features.role.RoleService;
+import com.viaz.dashboard.features.role.dto.RoleCreationRequestDTO;
+import com.viaz.dashboard.features.shipment.idGenerator.ShipmentIdGeneratorService;
 import com.viaz.dashboard.initializers.lists.PermissionList;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,9 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class PermissionInitializer {
+
+    private static final Logger logger = LoggerFactory.getLogger(PermissionInitializer.class);
+
 
     private final PermissionService permissionService;
     private final RoleService roleService;
@@ -67,9 +72,9 @@ public class PermissionInitializer {
 
 
         // Create cosmetic role for customer service
-        if (roleService.findByName("Customer Service").isEmpty()) {
+        if (roleService.findByName("Client Service").isEmpty()) {
             roleService.createRole(new RoleCreationRequestDTO(
-                    "Customer Service",
+                    "Client Service",
                     "Cosmetic role for customer service",
                     true
             ));
@@ -95,7 +100,7 @@ public class PermissionInitializer {
                 if (!role.getPermissions().contains(permission)) {
                     role.addPermission(permission);
                 } else {
-                    System.out.println("ROLE ALREADY HAS PERMISSION: " + permissionName);
+                    logger.info("ROLE ALREADY HAS PERMISSION: {}", permissionName);
                     throw new IllegalStateException("Role " + role.getName() + " already has permission " + permissionName);
                 }
             });
