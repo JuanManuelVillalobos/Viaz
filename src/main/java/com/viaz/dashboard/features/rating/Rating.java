@@ -1,13 +1,14 @@
-package com.viaz.dashboard.entity.rating;
+package com.viaz.dashboard.features.rating;
 
-import com.viaz.dashboard.entity.carrier.Carrier;
-import com.viaz.dashboard.entity.shipment.Shipment;
+import com.viaz.dashboard.features.carrier.Carrier;
+import com.viaz.dashboard.features.shipment.Shipment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @ToString
@@ -27,10 +28,10 @@ public class Rating {
     private Long ratingId;
 
     @Column(name = "shipment_rating")
-    private Integer shipmentRating;
+    private Double shipmentRating;
 
     @Column(name = "customer_service_rating")
-    private Integer customerServiceRating;
+    private Double customerServiceRating;
 
     @Column(name = "rating_observation")
     private String ratingObservation;
@@ -38,14 +39,14 @@ public class Rating {
 //  Rating Statistics
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    private Instant createdDate;
 
     @LastModifiedDate
     @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
+    private Instant lastModifiedDate;
 
     @OneToOne
-    @JoinColumn(name = "viaz_id")
+    @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
     @ManyToOne(fetch = FetchType.LAZY)
