@@ -1,4 +1,4 @@
-package com.viaz.dashboard.entity.permission;
+package com.viaz.dashboard.features.permission;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
