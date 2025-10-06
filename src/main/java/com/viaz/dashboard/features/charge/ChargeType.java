@@ -1,16 +1,17 @@
-package com.viaz.dashboard.entity.charge;
+package com.viaz.dashboard.features.charge;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-@ToString
+@Entity
+@Table(name = "charges")
 @Getter
 @Setter
+@ToString
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "charges")
-@Entity
+@Builder
 public class ChargeType {
 
     @Id
@@ -20,6 +21,10 @@ public class ChargeType {
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
+
+    @Column(name = "penalty", nullable = false)
+    private double penalty;
+
 
     public ChargeType(String name) {
         this.name = name;
