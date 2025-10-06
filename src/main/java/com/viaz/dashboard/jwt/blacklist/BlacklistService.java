@@ -37,7 +37,7 @@ public class BlacklistService {
     public void removeExpiredTokens() {
         log.info("Running scheduled cleanup of expired blacklisted tokens");
         List<BlacklistedToken> expiredTokens = 
-            blacklistedTokenRepository.findByExpirationDateBefore(LocalDateTime.now());
+            blacklistedTokenRepository.findByExpirationDateBefore(Instant.now());
         
         if (!expiredTokens.isEmpty()) {
             blacklistedTokenRepository.deleteAll(expiredTokens);
