@@ -14,7 +14,12 @@ public enum IncidentList {
     INCONVENIENTE_EN_TRATO_DEL_OPERADOR("Inconveniente en trato del operador", 1, "carrier"),
     INTOXICACION("Intoxicación", 1, "carrier"),
     RETRASO_EN_ENTREGA_DE_VACIO("Retraso en entrega de vacío", 1, "carrier"),
-    LIBERACION_DE_DESPACHO_FALLIDA("Liberación de despacho fallida", 2, "carrier");
+    LIBERACION_DE_DESPACHO_FALLIDA("Liberación de despacho fallida", 2, "carrier"),
+    ENVIO_TARDIO_DE_MANIOBRAS_DE_CARGA("Envío tardío de maniobras de carga",1,"client"),
+    ENVIO_TARDIDO_DE_MANIOBRAS_DE_VACIOS("Envío tardío de maniobras de vacíos",1,"client"),
+    RETRASO_EN_DESCARGA("Retraso en descarga",1,"client"),
+    NO_NOTIFICAR_REQUISITO_DE_LAVADO("No notificar requisito de lavado", 1, "client"),
+    CONTENEDOR_VACIO_DANADO("Contenedor vacío/dañado",1,"client");
 
 
     private final String name;
