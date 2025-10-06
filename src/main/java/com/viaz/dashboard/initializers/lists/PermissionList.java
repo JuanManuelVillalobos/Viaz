@@ -11,8 +11,12 @@ public enum PermissionList {
     SHIPMENT_READ("SHIPMENT_READ", "Read shipment information", "SHIPMENT", "READ"),
     SHIPMENT_WRITE("SHIPMENT_WRITE", "Create and update shipments", "SHIPMENT", "WRITE"),
     SHIPMENT_DELETE("SHIPMENT_DELETE", "Delete shipments", "SHIPMENT", "DELETE"),
+    SHIPMENT_RESTORE("SHIPMENT_RESTORE", "Restore shipments", "SHIPMENT", "RESTORE"),
     SHIPMENT_MANAGE("SHIPMENT_MANAGE", "Full shipment management", "SHIPMENT", "MANAGE"),
+    SHIPMENT_EXPORT("SHIPMENT_EXPORT", "Export shipments to xls file", "SHIPMENT", "EXPORT"),
     SHIPMENT_CLOSE("SHIPMENT_CLOSE", "Ability to closea and rate shipments", "SHIPMENT", "CLOSE"),
+    SHIPMENT_INCIDENT_DELETE("SHIPMENT_INCIDENT_DELETE", "Ability to close incidents", "SHIPMENT", "INCIDENT_DELETE"),
+    SHIPMENT_CHARGE_DELETE("SHIPMENT_CHARGE_DELETE", "Ability to close charges", "SHIPMENT", "CHARGE_DELETE"),
 
 
     USER_READ("USER_READ", "Read user information", "USER", "READ"),
@@ -30,7 +34,10 @@ public enum PermissionList {
     CARRIER_READ("CARRIER_READ", "Read carrier information", "CARRIER", "READ"),
     CARRIER_WRITE("CARRIER_WRITE", "Create and update carriers", "CARRIER", "WRITE"),
     CARRIER_DELETE("CARRIER_DELETE", "Delete carriers", "CARRIER", "DELETE"),
-    CARRIER_MANAGE("CARRIER_MANAGE", "Full carrier management", "CARRIER", "MANAGE");
+    CARRIER_MANAGE("CARRIER_MANAGE", "Full carrier management", "CARRIER", "MANAGE"),
+
+    INCIDENT_MANAGE("INCIDENT_MANAGE", "Full incident management", "INCIDENT", "MANAGE"),
+    CHARGE_MANAGE("CHARGE_MANAGE", "Full charge management", "CHARGE", "MANAGE");
     // Getters
     private final String name;
     private final String description;
