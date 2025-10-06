@@ -32,6 +32,12 @@ public class CacheConfig {
                         .recordStats()
                         .build()),
 
+                new CaffeineCache("assignedOpenShipmentsCache", Caffeine.newBuilder()
+                        .maximumSize(300)
+                        .expireAfterWrite(5, TimeUnit.MINUTES)
+                        .recordStats()
+                        .build()),
+
                 new CaffeineCache("shipment", Caffeine.newBuilder()
                         .maximumSize(100)
                         .expireAfterWrite(15, TimeUnit.MINUTES)
