@@ -1,8 +1,8 @@
-package com.viaz.dashboard.entity.role;
+package com.viaz.dashboard.features.role;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.viaz.dashboard.entity.permission.Permission;
-import com.viaz.dashboard.entity.user.ViazUser;
+import com.viaz.dashboard.features.permission.Permission;
+import com.viaz.dashboard.features.user.ViazUser;
 import jakarta.persistence.*;
 import lombok.*;
 
