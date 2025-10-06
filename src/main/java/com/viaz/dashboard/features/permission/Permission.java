@@ -1,4 +1,4 @@
-package com.viaz.dashboard.entity.permission;
+package com.viaz.dashboard.features.permission;
 
 
 import jakarta.persistence.*;
