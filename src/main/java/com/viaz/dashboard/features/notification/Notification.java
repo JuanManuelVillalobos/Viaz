@@ -1,13 +1,12 @@
-package com.viaz.dashboard.entity.notification;
+package com.viaz.dashboard.features.notification;
 
-import com.viaz.dashboard.entity.user.ViazUser;
+import com.viaz.dashboard.features.user.ViazUser;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ManyToAny;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 
 @ToString
@@ -16,6 +15,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "notifications")
 @Entity
 public class Notification {
@@ -31,10 +31,18 @@ public class Notification {
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    private Instant timeStamp;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private ViazUser recipient;
 
+    public Notification(String message, ViazUser recipient) {
+        this.message = message;
+        this.recipient = recipient;
+    }
+
+    public boolean getRead() {
+        return read;
+    }
 }
