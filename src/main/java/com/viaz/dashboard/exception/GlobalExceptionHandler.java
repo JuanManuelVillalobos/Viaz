@@ -5,6 +5,7 @@ import com.viaz.dashboard.exception.exceptions.TokenRevokedException;
 import com.viaz.dashboard.exception.exceptions.TokenValidationException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -136,6 +137,15 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.FORBIDDEN;
 
         return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Authorization Denied", ex.getMessage()));
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
+        log.error("Entity not found: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Not Found", ex.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
