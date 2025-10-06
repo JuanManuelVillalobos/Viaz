@@ -1,4 +1,4 @@
-package com.viaz.dashboard.entity.charge;
+package com.viaz.dashboard.features.charge;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
