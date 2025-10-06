@@ -1,4 +1,4 @@
-package com.viaz.dashboard.entity.role.helpers;
+package com.viaz.dashboard.features.role.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

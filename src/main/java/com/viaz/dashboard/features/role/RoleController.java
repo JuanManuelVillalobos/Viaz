@@ -1,7 +1,7 @@
-package com.viaz.dashboard.entity.role;
+package com.viaz.dashboard.features.role;
 
-import com.viaz.dashboard.entity.role.helpers.RoleCreationRequestDTO;
-import com.viaz.dashboard.entity.role.helpers.RoleResponseDTO;
+import com.viaz.dashboard.features.role.dto.RoleCreationRequestDTO;
+import com.viaz.dashboard.features.role.dto.RoleResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +21,7 @@ public class RoleController {
 
 
     private final RoleService roleService;
+    private final RoleRepository roleRepository;
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'ROLES_WRITE')")
     @PostMapping("/create-role")
@@ -45,5 +46,16 @@ public class RoleController {
         response.put("message", "Permission added successfully to role " + HtmlUtils.htmlEscape(roleName));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'ROLES_DELETE')")
+    @DeleteMapping("/delete-role/{roleId}")
+    public ResponseEntity<Map<String, Object>> deleteRole(@PathVariable Long roleId) {
+        String deletedRoleName = roleService.deleteRoleById(roleId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Role " + deletedRoleName + " successfully deleted");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
 }

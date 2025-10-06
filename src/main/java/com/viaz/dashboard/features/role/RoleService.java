@@ -1,13 +1,16 @@
-package com.viaz.dashboard.entity.role;
+package com.viaz.dashboard.features.role;
 
 
-import com.viaz.dashboard.entity.permission.Permission;
-import com.viaz.dashboard.entity.permission.PermissionService;
-import com.viaz.dashboard.entity.role.helpers.RoleCreationRequestDTO;
-import com.viaz.dashboard.entity.role.helpers.RoleResponseDTO;
+import com.viaz.dashboard.features.permission.Permission;
+import com.viaz.dashboard.features.permission.PermissionService;
+import com.viaz.dashboard.features.role.dto.RoleCreationRequestDTO;
+import com.viaz.dashboard.features.role.dto.RoleResponseDTO;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
+import com.viaz.dashboard.initializers.ShipmentIdInitializer;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -19,6 +22,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class RoleService {
+
+    private static final Logger logger = LoggerFactory.getLogger(RoleService.class);
+
 
     private final RoleRepository roleRepository;
     private final PermissionService permissionService;
@@ -77,20 +83,13 @@ public class RoleService {
                 role.getRoleId(),
                 HtmlUtils.htmlEscape(role.getName()),
                 HtmlUtils.htmlEscape(role.getDescription()),
-                permissions
+                permissions,
+                role.isCosmetic()
         );
     }
 
     public Role saveRole(Role role) {
         return roleRepository.save(role);
-    }
-
-    @Transactional
-    public void deleteRole(Role role) {
-        if (role.isSystemProtected()) {
-            throw new IllegalStateException("System role 'ADMIN' cannot be deleted");
-        }
-        roleRepository.delete(role);
     }
 
 
@@ -118,7 +117,7 @@ public class RoleService {
                     return;
                 });
 
-        System.out.println("Adding permission '" + permissionToAdd.getName() + "' to role '" + role.getName() + "'");
+        logger.info("Adding permission '{}' to role '{}'", permissionToAdd.getName(), role.getName());
         role.addPermission(permissionToAdd);
         saveRole(role);
     }
@@ -134,6 +133,26 @@ public class RoleService {
             role.removePermission(permission);
             saveRole(role);
         }
+    }
+
+    @Transactional
+    public String deleteRoleById(Long roleId) {
+        if (roleId == null) {
+            throw new IllegalArgumentException("Role ID cannot be null");
+        }
+        if (!roleRepository.existsById(roleId)) {
+            throw new IllegalArgumentException("Role with ID " + roleId + " does not exist");
+        }
+
+        Role role = roleRepository.getByRoleId(roleId);
+
+        if (role.isSystemProtected()) {
+            throw new IllegalStateException("System role 'ADMIN' cannot be deleted");
+        }
+        String roleName = role.getName();
+        roleRepository.delete(role);
+        return roleName;
+
     }
 
 }
