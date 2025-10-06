@@ -26,4 +26,8 @@ public enum IncidentList {
         this.penalty = penalty;
         this.typeOfEntityRelation = typeOfEntityRelation;
     }
+
+    public enum TypeOfEntityRelation {
+        CARRIER, CLIENT
+    }
 }
