@@ -1,8 +1,8 @@
 package com.viaz.dashboard.config;
 
-import com.viaz.dashboard.entity.user.UserRepository;
-import com.viaz.dashboard.entity.user.ViazUser;
-import com.viaz.dashboard.entity.user.userDetails.ViazUserDetails;
+import com.viaz.dashboard.features.user.UserRepository;
+import com.viaz.dashboard.features.user.ViazUser;
+import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
