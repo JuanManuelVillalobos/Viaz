@@ -38,6 +38,7 @@ public class SecurityFilterChainConfig {
                     });
                     authorizeRequests
                             .requestMatchers("/api/**").authenticated()
+                            .requestMatchers("/ws/**").permitAll()
                             .requestMatchers("/**").permitAll();
                 })
                 .httpBasic(Customizer.withDefaults())

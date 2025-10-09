@@ -1,9 +1,11 @@
 package com.viaz.dashboard.auth;
 
-import com.viaz.dashboard.auth.helper.UserAuthResponse;
+import com.viaz.dashboard.auth.dto.LoginRequestDTO;
+import com.viaz.dashboard.auth.dto.SetPasswordDTO;
+import com.viaz.dashboard.auth.dto.UserAuthResponseDTO;
 import com.viaz.dashboard.jwt.Token;
-import com.viaz.dashboard.entity.user.ViazUser;
-import com.viaz.dashboard.entity.user.helpers.ViazUserDTO;
+import com.viaz.dashboard.features.user.ViazUser;
+import com.viaz.dashboard.features.user.dto.ViazUserResponseDTO;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -24,19 +26,19 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserAuthResponse> getCurrentUserAuth(Authentication authentication){
+    public ResponseEntity<UserAuthResponseDTO> getCurrentUserAuth(Authentication authentication){
         return authService.getCurrentUserAuth(authentication);
     }
 
     // Register User
     @PostMapping("/register")
-    public ViazUser registerUser(@RequestBody ViazUserDTO viazUser) throws MessagingException {
+    public ViazUser registerUser(@RequestBody ViazUserResponseDTO viazUser) throws MessagingException {
         return authService.register(viazUser);
     }
 
     @PostMapping("/set-password")
-    public ViazUserDTO createUser(@RequestBody String viazUserPassword, @RequestParam String email, @RequestParam String token) throws Exception {
-        return authService.changePassword(email,viazUserPassword,token);
+    public ViazUserResponseDTO createUser(@RequestBody SetPasswordDTO request, @RequestParam String email, @RequestParam String token) throws Exception {
+        return authService.changePassword(email,request,token);
     }
 
     @PostMapping("/forgot-password")
@@ -46,8 +48,8 @@ public class AuthController {
 
     //    Login User
     @PostMapping("/login")
-    public Token verify(@RequestBody ViazUser viazUser, HttpServletResponse response) {
-        return authService.login(viazUser,response);
+    public Token verify(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
+        return authService.login(request,response);
     }
 
     @PostMapping("/logout")

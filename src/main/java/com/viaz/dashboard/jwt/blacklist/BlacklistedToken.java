@@ -3,6 +3,7 @@ package com.viaz.dashboard.jwt.blacklist;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -27,10 +28,10 @@ public class BlacklistedToken {
 
     private String token;
 
-    private LocalDateTime expirationDate;
+    private Instant expirationDate;
 
     // Constructor for creating a new BlacklistedToken
-    public BlacklistedToken(String token, LocalDateTime expirationDate) {
+    public BlacklistedToken(String token, Instant expirationDate) {
         this.id = UUID.randomUUID();
         this.token = token;
         this.expirationDate = expirationDate;

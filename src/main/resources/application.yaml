@@ -1,19 +1,35 @@
 #### SPRING
 spring:
+
+  #### FLYWAY
+  flyway:
+    url: jdbc:postgresql://localhost:5432/viaz
+    user: postgres
+    baseline-on-migrate: true
+  ####
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  codec:
-    max-in-memory-size: 10MB
-
+  ####
 
   ### CACHE
   cache:
     type: caffeine
     caffeine:
       spec: maximumSize=500,expireAfterWrite=60m
+
   ###
+
+
+  ### JACKSON
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+  ###
+
 
   ### DATABASE
   datasource:
@@ -27,9 +43,11 @@ spring:
           org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
   ###
+
+
   ### EMAIL SERVICE
   mail:
     host: smtp.gmail.com
@@ -42,6 +60,11 @@ spring:
           auth: true
           starttls.enable: true
   ###
+  http:
+    codecs:
+      max-in-memory-size: 10MB
+
+
 ####
 
 ### DEBUG LEVEL
@@ -51,20 +74,30 @@ server:
       cookie:
         http-only: true
         secure: true
-#   TODO check if url is secure, otherwise the cookie will not be sent
+  #   TODO check if url is secure, otherwise the cookie will not be sent
   error:
     include-message: always
 #    UNCOMMENT ADDRESS WHEN WANTING TO EXPOSE TO LAN
 #  address: 0.0.0.0
 logging:
   level:
-    org.springframework.mail: warn
+    org.springframework.mail: debug
+    org.springframework.web.socket: debug
+    org.springframework.messaging: debug
+
   ###
 
 ### JWT SECRET KEY
 jwt:
   secret:
     key: ${JWT_SECRET}
+###
+
+### RATING WEIGHTS
+rating:
+  weight:
+    customerService: ${CUSTOMER_SERVICE_RATING_WEIGHT:0.5}
+    shipment: ${SHIPMENT_RATING_WEIGHT:0.5}
 ###
 
 ### Default user after start
@@ -79,6 +112,10 @@ default:
 frontend:
   url: ${FRONTEND_URL}
 ###
+
+### Viaz ID start
+migration:
+  viazIdStartNumber: ${VIAZ_ID_START_NUMBER}
 
 ### RATE LIMIT
 rate:

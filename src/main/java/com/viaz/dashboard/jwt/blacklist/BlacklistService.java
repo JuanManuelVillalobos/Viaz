@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class BlacklistService {
     }
 
     @CacheEvict(value = "tokenBlacklist", key = "#token")
-    public void addToBlacklist(String token, LocalDateTime expirationDate) {
+    public void addToBlacklist(String token, Instant expirationDate) {
         log.debug("Adding token to blacklist with expiration date: {}", expirationDate);
         blacklistedTokenRepository.save(new BlacklistedToken(token, expirationDate));
     }
@@ -31,13 +32,12 @@ public class BlacklistService {
         return blacklistedTokenRepository.existsByToken(token);
     }
 
-    @Scheduled(cron = "0 0 */1 * * *") // Run every hour
     @Transactional
     @CacheEvict(value = "tokenBlacklist", allEntries = true)
     public void removeExpiredTokens() {
         log.info("Running scheduled cleanup of expired blacklisted tokens");
         List<BlacklistedToken> expiredTokens = 
-            blacklistedTokenRepository.findByExpirationDateBefore(LocalDateTime.now());
+            blacklistedTokenRepository.findByExpirationDateBefore(Instant.now());
         
         if (!expiredTokens.isEmpty()) {
             blacklistedTokenRepository.deleteAll(expiredTokens);

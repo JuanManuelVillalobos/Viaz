@@ -30,7 +30,7 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "access");
         // 10 minutes
-        long ACCESS_TOKEN_VALIDITY =  10 * 60;
+        long ACCESS_TOKEN_VALIDITY = 10 * 60;
         return createToken(claims, username, ACCESS_TOKEN_VALIDITY);
     }
 
@@ -45,15 +45,7 @@ public class JwtUtil {
 
     private String createToken(Map<String, Object> claims, String username, Long validity) {
 
-        return Jwts.builder()
-                .claims()
-                .add(claims)
-                .subject(username)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * validity))
-                .and()
-                .signWith(getKey())
-                .compact();
+        return Jwts.builder().claims().add(claims).subject(username).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + 1000 * validity)).and().signWith(getKey()).compact();
     }
 
     private SecretKey getKey() {
@@ -72,11 +64,7 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return Jwts.parser().verifyWith(getKey()).build().parseSignedClaims(token).getPayload();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {

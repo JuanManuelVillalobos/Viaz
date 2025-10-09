@@ -13,7 +13,7 @@ Content-Type: application/json
 
 {
   "email": "juanmavillalobosn@gmail.com",
-  "password": "juan2005"
+  "password": "password"
 }
 
 ### Create Unvalidated User
@@ -33,7 +33,7 @@ POST localhost:8080/api/auth/forgot-password
 Authorization: Bearer
 Content-Type: text/plain
 
-juanmavillalobosn@gmail.com
+admin@example.com
 
 
 ### Register User With Password
@@ -107,7 +107,10 @@ Authorization: Bearer
 Content-Type: application/json
 
 {
-  "name": "Cava"
+  "name": "Cava",
+  "caat": "4DC1",
+  "razonSocial": "MiRazonSocial",
+  "rfc": "1234567890"
 }
 
 ### Get Carriers
@@ -120,10 +123,10 @@ Authorization: Bearer
 
 ### Get current Auth
 GET http://localhost:8080/api/auth/me
-Authorization: Bearer
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiY3VzdG9tZXJTZXJ2aWNlVXNlciIsImlhdCI6MTc1NzcwNDgxNiwiZXhwIjoxNzU3NzA0ODI2fQ.NPtWgw22u2JVitPAmoGhtquwNEnAmyyjXzm8WU71z9aZ2uopXtDf3tPy9zTBncNOYPkJ093FhMAwuqvVLkcQIw
 
 ### Assign role to user
-POST http://localhost:8080/api/user/1/assign-role/MANAGER
+POST http://localhost:8080/api/user/1/assign-role/testName3
 Authorization: Bearer
 
 ### Remove role from user
@@ -133,11 +136,80 @@ Authorization: Bearer
 
 ### Create role
 POST http://localhost:8080/api/role/create-role
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTU4MTM1NDQsImV4cCI6MTc1NTgxNDE0NH0.FG4iRCcFPZZcy0Y4ap3eS0xQceaUbJNLmxjPe1hsTYjMfgFI7caevUI44Mh15CaEVlKT-il6iMWb4sZCUaS9wA
+Authorization: Bearer
 Content-Type: application/json
 
 {
-  "name": "testName",
+  "name": "testName3",
   "description": "ROle Description",
-  "displayName": "testDisplayName"
+  "cosmetic": true
 }
+
+
+### Get client service roles
+GET http://localhost:8080/api/user/get-client-service-users
+Authorization: Bearer
+
+### Get carriers with sensitive fields
+GET http://localhost:8080/api/carrier/get-carriers-with-sensitive-fields
+Authorization: Bearer
+
+### Get incident types
+GET http://localhost:8080/api/incident/get-incident-types
+Authorization: Bearer
+
+
+### Add incident to shipment
+POST http://localhost:8080/api/shipment/add-incident/VZ-2025-010/2/aaa
+Authorization: Bearer
+
+
+### Close shipment
+POST http://localhost:8080/api/shipment/close-shipment/VZ-2025-001/10/a
+Authorization: Bearer
+
+### New incident
+POST http://localhost:8080/api/incident/create-incident-type
+Authorization: Bearer
+Content-Type: application/json
+
+{
+  "name" : "nombre"
+}
+
+### Get shipments by tipe of service
+GET http://localhost:8080/api/stats/get-number-of-shipments-by-type-of-service
+Authorization: Bearer
+
+
+### Get monntly average ratings for carriers
+GET http://localhost:8080/api/stats/get-monthly-ratings-of-carriers
+Authorization: Bearer
+
+### DEV notifiy admins fro when shipment is overdue
+GET http://localhost:8080/api/shipment/checkforoverdueshipments
+Authorization: Bearer
+
+
+### Get shipment Variant
+POST http://localhost:8080/api/shipment/create-shipment-variant/VZ-2025-1872
+Authorization: Bearer
+
+
+### Get Variants
+GET http://localhost:8080/api/shipment/get-variants/VZ-2025-1872
+Authorization: Bearer
+
+
+### Get Shipment
+GET http://localhost:8080/api/shipment/get-shipment/VZ-2025-1872
+Authorization: Bearer
+
+
+### Get carrier Ratings
+GET http://localhost:8080/api/stats/get-monthly-ratings-of-carrier/1
+Authorization: Bearer
+
+### Get Reschedules
+GET http://localhost:8080/api/shipment/get-reschedule-details/VZ-2025-1873
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJ0eXBlIjoiYWNjZXNzIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NTg5Mzg2NjIsImV4cCI6MTc1ODkzOTI2Mn0.vGf0Wm1Skav-WdiIzTmvh0wgQ-MRZ0MygEuDK_7iOGVhadYwsNq6lPVes4H4fLAKDoPW0ZBP4MH1xUlPgvvUuA

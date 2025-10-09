@@ -1,6 +1,9 @@
 package com.viaz.dashboard.s3;
 
+import com.viaz.dashboard.initializers.ShipmentIdInitializer;
 import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class S3Service {
 
+    private static final Logger logger = LoggerFactory.getLogger(S3Service.class);
+
     private final S3Client s3;
     private final String bucketName;
     private final S3Presigner s3Presigner; // Add S3Presigner
@@ -34,13 +39,13 @@ public class S3Service {
 
         @CacheEvict(value = "s3Objects", allEntries = true)
     public PutObjectResponse putObject(String key, byte[] file) {
-        System.out.println("Uploading to S3 bucket: " + bucketName + " with key: " + key + " ...");
+            logger.info("Uploading to S3 bucket: {} with key: {} ...", bucketName, key);
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
                 .build();
         PutObjectResponse response = s3.putObject(objectRequest, RequestBody.fromBytes(file));
-        System.out.println("Done uploading to S3: " + key);
+            logger.info("Done uploading to S3: {}", key);
         return response;
     }
 

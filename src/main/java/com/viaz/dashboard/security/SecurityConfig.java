@@ -1,6 +1,6 @@
 package com.viaz.dashboard.security;
 
-import com.viaz.dashboard.entity.permission.helper.PermissionEvaluatorImpl;
+import com.viaz.dashboard.filters.PermissionEvaluatorImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;
