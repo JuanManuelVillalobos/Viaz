@@ -67,6 +67,16 @@ public class Carrier {
         this.caat = caat;
     }
 
+    @Column(name = "deleted")
+    private boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "deleted_by_user_id")
+    private ViazUser deletedByUserId;
+
     @Override
     public String toString() {
         return String.format("Carrier %s", name);
