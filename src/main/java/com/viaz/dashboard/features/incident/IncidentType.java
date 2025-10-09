@@ -4,6 +4,8 @@ import com.viaz.dashboard.initializers.lists.IncidentList;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "incidents")
 @Getter
@@ -28,6 +30,12 @@ public class IncidentType {
 
     @Column(name = "entityTied", nullable = false)
     private IncidentList.TypeOfEntityRelation entityTied; // It may be 'carrier' or 'client'
+
+    @Column(name = "deleted")
+    private boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     public IncidentType(String name, IncidentList.TypeOfEntityRelation entityTied) {
         this.name = name;
