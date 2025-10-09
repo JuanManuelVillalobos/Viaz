@@ -37,6 +37,12 @@ public class Notification {
     @JoinColumn(name = "user_id")
     private ViazUser recipient;
 
+    @Column(name = "deleted")
+    private boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     public Notification(String message, ViazUser recipient) {
         this.message = message;
         this.recipient = recipient;
@@ -45,4 +51,5 @@ public class Notification {
     public boolean getRead() {
         return read;
     }
+
 }
