@@ -24,9 +24,5 @@ public class PermissionService {
         Permission permission = new Permission(name, description, resource, action);
         return permissionRepository.save(permission);
     }
-
-    public void deletePermission(Long permissionId) {
-        permissionRepository.deleteById(permissionId);
-    }
 }
 
