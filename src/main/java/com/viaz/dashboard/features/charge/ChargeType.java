@@ -3,6 +3,8 @@ package com.viaz.dashboard.features.charge;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "charges")
 @Getter
@@ -25,6 +27,12 @@ public class ChargeType {
     @Column(name = "penalty", nullable = false)
     private double penalty;
 
+
+    @Column(name = "deleted")
+    private boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     public ChargeType(String name) {
         this.name = name;
