@@ -24,7 +24,7 @@ public class CarrierService {
     private final CarrierRepository carrierRepository;
     private final ShipmentRepository shipmentRepository;
 
-    public String createCarrier(CarrierRequestDTO carrier) {
+    public void createCarrier(CarrierRequestDTO carrier) {
         if (carrier == null) {
             throw new IllegalArgumentException("Carrier cannot be null");
         }
@@ -36,7 +36,6 @@ public class CarrierService {
         Carrier newCarrier = new Carrier(carrier.name(), carrier.rfc(), carrier.razonSocial(), carrier.caat());
 
         carrierRepository.save(newCarrier);
-        return String.format("%s saved successfully.", newCarrier.getName());
     }
 
     public List<CarrierResponseDTO> getCarriers() {
@@ -138,7 +137,7 @@ public class CarrierService {
     @Transactional
     public void deleteCarrier(Long carrierId) {
         if (carrierId == null) {
-            throw new IllegalArgumentException("Role ID cannot be null");
+            throw new IllegalArgumentException("Carrier ID cannot be null");
         }
         if (!carrierRepository.existsById(carrierId)) {
             throw new IllegalArgumentException("Carrier with ID " + carrierId + " does not exist");
