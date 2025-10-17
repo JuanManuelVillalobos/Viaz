@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "incidents")
+@Table(name = "incident_types")
 @Getter
 @Setter
 @ToString
