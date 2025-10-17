@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 public record ShipmentExcelDTO(
         String fullViazId,
         String status,
-        String client,
+        String clientName,
         String transportName,
         String origin,
         String destination,
@@ -30,7 +30,9 @@ public record ShipmentExcelDTO(
         this(
                 shipment.getFullViazId(),
                 shipment.getStatus(),
-                shipment.getClient(),
+                shipment.getClient() != null ?
+                        shipment.getClient().getName() :
+                        null,
                 shipment.getTransport() != null ? shipment.getTransport().getName() : "",
                 shipment.getOrigin(),
                 shipment.getDestination(),
