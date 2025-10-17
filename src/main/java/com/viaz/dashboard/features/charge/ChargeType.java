@@ -1,12 +1,13 @@
 package com.viaz.dashboard.features.charge;
 
+import com.viaz.dashboard.initializers.lists.ChargeList;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
 
 @Entity
-@Table(name = "charges")
+@Table(name = "charge_types")
 @Getter
 @Setter
 @ToString
@@ -27,6 +28,9 @@ public class ChargeType {
     @Column(name = "penalty", nullable = false)
     private double penalty;
 
+    @Column(name = "entityTied", nullable = false)
+    private ChargeList.TypeOfEntityRelation entityTied; // It may be 'carrier' or 'client' or something else
+
 
     @Column(name = "deleted")
     private boolean deleted = false;
@@ -34,7 +38,8 @@ public class ChargeType {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    public ChargeType(String name) {
+    public ChargeType(String name, ChargeList.TypeOfEntityRelation entityTied) {
         this.name = name;
+        this.entityTied = entityTied;
     }
 }
