@@ -5,5 +5,5 @@ import com.viaz.dashboard.initializers.lists.IncidentList;
 public record IncidentTypeRequestDTO(
         String name,
         Integer penalty,
-        String typeOfEntityRelation
+        String entityTied
         ) { }
