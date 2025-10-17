@@ -1,6 +1,7 @@
 package com.viaz.dashboard.features.shipment.incident;
 
 import com.viaz.dashboard.features.shipment.Shipment;
+import com.viaz.dashboard.initializers.lists.IncidentList;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,10 @@ public class ShipmentIncidentService {
         shipmentIncidentRepository.delete(shipmentIncident);
     }
 
+    public List<ShipmentIncident> getIncidentsByShipment(Shipment shipment) {
+        return shipmentIncidentRepository.findByShipment(shipment);
+    }
+
     public long getNumberOfIncidentsByShipment(Shipment shipment) {
         return shipmentIncidentRepository.findByShipment(shipment).size();
     }
@@ -30,7 +35,8 @@ public class ShipmentIncidentService {
         return shipmentIncidentRepository.save(shipmentIncident);
     }
 
-    public List<ShipmentIncident> getCarrierIncidentsByShipment(Shipment shipment) {
-        return shipmentIncidentRepository.findByShipment(shipment);
+
+    public List<ShipmentIncident> getIncidentsByShipmentTypeOfEntity(Shipment shipment, IncidentList.TypeOfEntityRelation relation) {
+        return shipmentIncidentRepository.findIncidentsByShipmentTypeOfEntity(shipment, relation);
     }
 }
