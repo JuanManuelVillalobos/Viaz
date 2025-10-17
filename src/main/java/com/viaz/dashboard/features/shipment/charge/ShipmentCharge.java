@@ -37,10 +37,14 @@ public class ShipmentCharge {
     @Column(name = "comment", length = 1000)
     private String comment;
 
+
+    //    ShipmentCharge Statistics
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private Instant occurredAt;
 
+
+    //    Constructors
     public ShipmentCharge(Shipment shipment, ChargeType chargeType, String comment) {
         this.shipment = shipment;
         this.chargeType = chargeType;
