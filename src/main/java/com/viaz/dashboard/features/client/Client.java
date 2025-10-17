@@ -3,18 +3,21 @@ package com.viaz.dashboard.features.client;
 import com.viaz.dashboard.features.user.ViazUser;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
 
-@ToString
 @Getter
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "clients")
+@EntityListeners(AuditingEntityListener.class)
+@Entity
 public class Client {
 
     @Id
@@ -22,8 +25,15 @@ public class Client {
     @Column(name = "client_id")
     private Long clientId;
 
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
+
+    public Client(String name) {
+        this.name = name;
+    }
+
+    //    Client Stats
     @Column(name = "deleted")
     private boolean deleted = false;
 
@@ -33,4 +43,20 @@ public class Client {
     @ManyToOne
     @JoinColumn(name = "deleted_by_user_id")
     private ViazUser deletedByUserId;
+
+
+    @CreatedBy
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private ViazUser createdBy;
+
+    @LastModifiedBy
+    @ManyToOne
+    @JoinColumn(name = "last_modified_by_user_id")
+    private ViazUser lastModifiedBy;
+
+    @Override
+    public String toString() {
+        return String.format("Client %s", name);
+    }
 }
