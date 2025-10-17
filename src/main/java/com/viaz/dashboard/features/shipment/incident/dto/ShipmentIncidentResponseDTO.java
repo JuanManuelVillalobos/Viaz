@@ -9,6 +9,7 @@ public record ShipmentIncidentResponseDTO(
         Long shipmentIncidentId,
         String shipment,
         String incidentType,
+        String entityTied,
         String comment,
         Instant occurredAt
 ) {
@@ -18,8 +19,11 @@ public record ShipmentIncidentResponseDTO(
                 shipmentIncident.getShipment() != null ?
                         shipmentIncident.getShipment().getFullViazId() :
                         null,
-                shipmentIncident.getIncidentType() != null ?
+                shipmentIncident.getIncidentType().getName() != null ?
                         shipmentIncident.getIncidentType().getName() :
+                        null,
+                shipmentIncident.getIncidentType().getEntityTied() != null ?
+                        String.valueOf(shipmentIncident.getIncidentType().getEntityTied()) :
                         null,
                 shipmentIncident.getComment(),
                 shipmentIncident.getOccurredAt()
