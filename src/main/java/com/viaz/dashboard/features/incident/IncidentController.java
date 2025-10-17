@@ -28,7 +28,7 @@ public class IncidentController {
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'INCIDENT_MANAGE')")
     @PostMapping(value = "/create-incident-type")
     public ResponseEntity<Map<String, Object>> createIncidentType(@RequestBody IncidentTypeRequestDTO incidentTypeRequest) {
-        incidentService.createIncidentOrThrow(incidentTypeRequest.name(), incidentTypeRequest.penalty(), incidentTypeRequest.typeOfEntityRelation());
+        incidentService.createIncidentOrThrow(incidentTypeRequest.name(), incidentTypeRequest.penalty(), incidentTypeRequest.entityTied());
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Incident type created successfully " + HtmlUtils.htmlEscape(incidentTypeRequest.name()));
