@@ -18,7 +18,7 @@ public class ShipmentIdInitializer implements CommandLineRunner {
     private final ShipmentIdGeneratorService idGeneratorService;
 
     @Value("${migration.viazIdStartNumber}")
-    private int MIGRATION_START_NUMBER = 5000;
+    private int MIGRATION_START_NUMBER = 1914;
 
     @Override
     public void run(String... args) throws Exception {
