@@ -1,6 +1,7 @@
 package com.viaz.dashboard.features.rating;
 
 import com.viaz.dashboard.features.carrier.Carrier;
+import com.viaz.dashboard.features.client.Client;
 import com.viaz.dashboard.features.shipment.Shipment;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,14 +28,24 @@ public class Rating {
     @Column(name = "rating_id")
     private Long ratingId;
 
-    @Column(name = "shipment_rating")
-    private Double shipmentRating;
+//    Shipment Related
+    @Column(name = "carrier_rating")
+    private Double carrierRating;
+    @Column(name = "client_rating")
+    private Double clientRating;
 
-    @Column(name = "customer_service_rating")
-    private Double customerServiceRating;
 
-    @Column(name = "rating_observation")
-    private String ratingObservation;
+//    Customer Service Related
+    @Column(name = "carrier_customer_service_rating")
+    private Double carrierCustomerServiceRating;
+    @Column(name = "client_customer_service_rating")
+    private Double clientCustomerServiceRating;
+
+    @Column(name = "carrier_rating_observation")
+    private String carrierRatingObservation;
+
+    @Column(name = "client_rating_observation")
+    private String clientRatingObservation;
 
 //  Rating Statistics
     @CreatedDate
@@ -52,4 +63,8 @@ public class Rating {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "carrier", referencedColumnName = "carrier_id")
     private Carrier carrier;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client", referencedColumnName = "client_id")
+    private Client client;
 }
