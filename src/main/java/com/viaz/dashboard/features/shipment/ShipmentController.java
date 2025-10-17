@@ -2,6 +2,7 @@ package com.viaz.dashboard.features.shipment;
 
 import com.viaz.dashboard.features.shipment.charge.dto.ShipmentChargeResponseDTO;
 import com.viaz.dashboard.features.shipment.charge.ShipmentChargeService;
+import com.viaz.dashboard.features.shipment.dto.ShipmentCloseRequestDTO;
 import com.viaz.dashboard.features.shipment.dto.ShipmentFilterOptionsDTO;
 import com.viaz.dashboard.features.shipment.dto.ShipmentResponseDTO;
 import com.viaz.dashboard.features.shipment.dto.ShipmentRequestDTO;
@@ -52,9 +53,10 @@ public class ShipmentController {
             @RequestParam(required = false) List<String> statuses,
             @RequestParam(required = false) List<String> clients,
             @RequestParam(required = false) List<String> carriers,
+            @RequestParam(required = false) List<String> customerServiceAgent,
             @RequestParam(required = false) String search
     ) {
-        return shipmentService.getShipments(page, size, statuses, clients, carriers, search);
+        return shipmentService.getShipments(page, size, statuses, clients, carriers, customerServiceAgent, search);
     }
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'SHIPMENT_READ')")
@@ -65,9 +67,10 @@ public class ShipmentController {
             @RequestParam(required = false) List<String> statuses,
             @RequestParam(required = false) List<String> clients,
             @RequestParam(required = false) List<String> carriers,
+            @RequestParam(required = false) List<String> customerServiceAgent,
             @RequestParam(required = false) String search
     ) {
-        return shipmentService.getOpenShipments(page, size, statuses, clients, carriers, search);
+        return shipmentService.getOpenShipments(page, size, statuses, clients, carriers, customerServiceAgent, search);
     }
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'SHIPMENT_READ')")
@@ -78,11 +81,12 @@ public class ShipmentController {
             @RequestParam(required = false) List<String> statuses,
             @RequestParam(required = false) List<String> clients,
             @RequestParam(required = false) List<String> carriers,
+            @RequestParam(required = false) List<String> customerServiceAgent,
             @RequestParam(required = false) String search
     ) {
 
 
-        return shipmentService.getAssignedShipments(page, size, statuses, clients, carriers, search);
+        return shipmentService.getAssignedShipments(page, size, statuses, clients, carriers, customerServiceAgent, search);
     }
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'SHIPMENT_READ')")
@@ -149,10 +153,11 @@ public class ShipmentController {
     }
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'SHIPMENT_CLOSE')")
-    @PostMapping(value = "/close-shipment/{viazId}/{rating}/{observations}")
-    public ResponseEntity<Map<String, Object>> closeShipment(@NonNull @PathVariable String viazId, @NonNull @PathVariable Integer rating, @PathVariable String observations) {
+    @PostMapping(value = "/close-shipment")
+    public ResponseEntity<Map<String, Object>> closeShipment(@RequestBody ShipmentCloseRequestDTO request) {
+        String fullViazId = request.fullViazId();
 
-        String shipmentViazId = shipmentService.closeShipment(viazId, rating, observations);
+        String shipmentViazId = shipmentService.closeShipment(fullViazId,request);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Shipment closed successfully " + shipmentViazId);
