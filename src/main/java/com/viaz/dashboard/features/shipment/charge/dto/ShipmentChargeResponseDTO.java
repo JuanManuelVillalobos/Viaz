@@ -9,6 +9,7 @@ public record ShipmentChargeResponseDTO(
         Long shipmentChargeId,
         String shipment,
         String chargeType,
+        String entityTied,
         String comment,
         Instant occurredAt
 ) {
@@ -20,6 +21,9 @@ public record ShipmentChargeResponseDTO(
                         null,
                 shipmentCharge.getChargeType() != null ?
                         shipmentCharge.getChargeType().getName() :
+                        null,
+                shipmentCharge.getChargeType() != null ?
+                        String.valueOf(shipmentCharge.getChargeType().getEntityTied()) :
                         null,
                 shipmentCharge.getComment(),
                 shipmentCharge.getOccurredAt()
