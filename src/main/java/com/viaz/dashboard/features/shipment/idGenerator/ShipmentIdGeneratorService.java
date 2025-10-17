@@ -58,6 +58,6 @@ public class ShipmentIdGeneratorService {
         int currentYear = Year.now().getValue();
 
         // The format uses a continuous sequence but includes the current year.
-        return String.format("VZ-%d-%d", currentYear, currentSequence);
+        return String.format("VZ%d-%d", currentYear, currentSequence);
     }
 }
