@@ -18,7 +18,6 @@ import java.util.function.Function;
 @Service
 public class JwtUtil {
 
-
     private final String secretKey;
 
     public JwtUtil(@Value("${jwt.secret.key}") String secretKey) {
@@ -44,7 +43,6 @@ public class JwtUtil {
 
 
     private String createToken(Map<String, Object> claims, String username, Long validity) {
-
         return Jwts.builder().claims().add(claims).subject(username).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + 1000 * validity)).and().signWith(getKey()).compact();
     }
 
@@ -84,6 +82,5 @@ public class JwtUtil {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
 }
 
