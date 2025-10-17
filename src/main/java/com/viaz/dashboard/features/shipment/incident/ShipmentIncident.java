@@ -49,11 +49,11 @@ public class ShipmentIncident {
 
 
 //    ShipmentIncident Statistics
-
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private Instant occurredAt;
 
+//    Constructors
     public ShipmentIncident(Shipment shipment, IncidentType incidentType, String comment) {
         this.shipment = shipment;
         this.incidentType = incidentType;
