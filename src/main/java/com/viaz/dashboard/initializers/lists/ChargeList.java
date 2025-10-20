@@ -12,7 +12,8 @@ public enum ChargeList {
     MANIOBRAS_EN_PISO_EN_MANZANILLO_SUBIR_Y_BAJAR_CONTENEDOR("Maniobras en piso en Manzanillo, subir y bajar contenedor", 2, "carrier"),
     BURRITO_EN_SANTA_ROSA("Burrito en Santa Rosa", 2, "carrier"),
     BURRITO_EN_MANZANILLO_MANIOBRA_DE_CARGA("Burrito en Manzanillo, maniobra de carga", 2, "carrier"),
-    BURRITO_EN_MANZANILLO_MANIOBRA_DE_DESCARGA("Burrito en Manzanillo, maniobra de vacío", 2, "carrier");
+    BURRITO_EN_MANZANILLO_MANIOBRA_DE_DESCARGA("Burrito en Manzanillo, maniobra de vacío", 2, "carrier"),
+    OTRO("Otro", 2, "carrier");
 
     private final String name;
     private final double penalty;
