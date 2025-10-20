@@ -19,7 +19,7 @@ public class IncidentType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "charge_id")
+    @Column(name = "incident_id")
     private Long incidentId;
 
     @Column(name = "name", unique = true, nullable = false)
@@ -28,7 +28,7 @@ public class IncidentType {
     @Column(name = "penalty", nullable = false)
     private double penalty;
 
-    @Column(name = "entityTied", nullable = false)
+    @Column(name = "entity_tied", nullable = false)
     private IncidentList.TypeOfEntityRelation entityTied; // It may be 'carrier' or 'client'
 
     @Column(name = "deleted")
