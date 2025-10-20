@@ -22,9 +22,14 @@ public interface ShipmentIncidentRepository extends JpaRepository<ShipmentIncide
 
     boolean existsShipmentIncidentByIncidentTypeIncidentId(Long incidentTypeIncidentId);
 
-    @Query("SELECT COUNT(si) FROM ShipmentIncident si " +
-            "WHERE si.shipment.open = true AND si.incidentType.entityTied = com.viaz.dashboard.initializers.lists.IncidentList.TypeOfEntityRelation.CARRIER")
+    @Query("""
+                SELECT COUNT(si)
+                FROM ShipmentIncident si
+                WHERE si.shipment.open = true
+                  AND si.incidentType.entityTied = com.viaz.dashboard.initializers.lists.IncidentList$TypeOfEntityRelation.CARRIER
+            """)
     Integer countCarrierIncidentsInOpenShipments();
+
 
     boolean existsByShipmentAndIncidentType_NameIgnoreCase(Shipment shipment, String incidentTypeName);
 }
