@@ -24,6 +24,7 @@ public class ShipmentIncident {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shipment_incident_id")
     private Long shipmentIncidentId;
 
     @ManyToOne(optional = false)
