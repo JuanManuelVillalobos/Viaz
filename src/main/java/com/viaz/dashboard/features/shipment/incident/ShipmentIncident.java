@@ -24,6 +24,7 @@ public class ShipmentIncident {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shipment_incident_id")
     private Long shipmentIncidentId;
 
     @ManyToOne(optional = false)
@@ -49,11 +50,11 @@ public class ShipmentIncident {
 
 
 //    ShipmentIncident Statistics
-
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private Instant occurredAt;
 
+//    Constructors
     public ShipmentIncident(Shipment shipment, IncidentType incidentType, String comment) {
         this.shipment = shipment;
         this.incidentType = incidentType;

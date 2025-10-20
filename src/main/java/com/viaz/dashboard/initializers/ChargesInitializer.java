@@ -23,13 +23,13 @@ public class ChargesInitializer {
 
     private void createDefaultCharges() {
         for (ChargeList charge : ChargeList.values()) {
-            createPermissionIfNotExists(charge.getName(), charge.getPenalty());
+            createChargeIfNotExists(charge.getName(), charge.getPenalty(), charge.getTypeOfEntityRelation());
         }
     }
 
-    private void createPermissionIfNotExists(String name, double penalty) {
+    private void createChargeIfNotExists(String name, double penalty, String typeOfEntityRelation) {
         if (chargeService.getChargeByName(name).isEmpty()) {
-            chargeService.createChargeOrThrow(name, penalty);
+            chargeService.createChargeOrThrow(name, penalty, typeOfEntityRelation);
         }
     }
 }

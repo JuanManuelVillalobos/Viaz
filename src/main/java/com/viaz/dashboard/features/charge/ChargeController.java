@@ -28,7 +28,7 @@ public class ChargeController {
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'CHARGE_MANAGE')")
     @PostMapping(value = "/create-charge-type")
     public ResponseEntity<Map<String, Object>> createChargeType(@RequestBody ChargeTypeRequestDTO chargeTypeRequest){
-        chargeService.createChargeOrThrow(chargeTypeRequest.name(), chargeTypeRequest.penalty());
+        chargeService.createChargeOrThrow(chargeTypeRequest.name(), chargeTypeRequest.penalty(), chargeTypeRequest.entityTied());
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Charge type created successfully " + HtmlUtils.htmlEscape(chargeTypeRequest.name()));

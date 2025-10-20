@@ -116,16 +116,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
     }
 
-    /*    Different exception handling approach
-        @ExceptionHandler(TokenRevokedException.class)
-        public ResponseEntity<ApiErrorResponse> handleTokenRevokedException(TokenRevokedException ex) {
-            log.error("Token revoked: {}", ex.getMessage());
 
-            HttpStatus status = HttpStatus.UNAUTHORIZED;
-
-            return ResponseEntity.status(status).body(ApiErrorResponse.of(status, "Token revoked", ex.getMessage()));
-        }
-    */
     private void setErrorResponse(HttpServletResponse response, HttpStatus status, String error, String message) {
         try {
             response.setStatus(status.value());

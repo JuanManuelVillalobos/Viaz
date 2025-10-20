@@ -4,11 +4,14 @@ import com.viaz.dashboard.features.carrier.CarrierService;
 import com.viaz.dashboard.features.carrier.dto.CarrierResponseDTO;
 import com.viaz.dashboard.features.charge.ChargeService;
 import com.viaz.dashboard.features.charge.ChargeType;
+import com.viaz.dashboard.features.client.ClientService;
+import com.viaz.dashboard.features.client.dto.ClientResponseDTO;
 import com.viaz.dashboard.features.incident.IncidentService;
 import com.viaz.dashboard.features.incident.IncidentType;
 import com.viaz.dashboard.features.rating.RatingRepository;
 import com.viaz.dashboard.features.shipment.ShipmentRepository;
 import com.viaz.dashboard.features.shipment.ShipmentService;
+import com.viaz.dashboard.features.shipment.dto.ShipmentCloseRequestDTO;
 import com.viaz.dashboard.features.shipment.dto.ShipmentRequestDTO;
 import com.viaz.dashboard.features.user.UserService;
 import com.viaz.dashboard.features.user.dto.UserSummaryDTO;
@@ -59,6 +62,7 @@ public class ShipmentInitializer implements CommandLineRunner {
     private final IncidentService incidentService;
     private final ChargeService chargeService;
     private final RatingRepository ratingRepository;
+    private final ClientService clientService;
 
     @Override
     @Transactional
@@ -67,6 +71,7 @@ public class ShipmentInitializer implements CommandLineRunner {
 
         List<String> customerAgents = userService.getUsersByRole("Client Service").stream().map(UserSummaryDTO::username).toList();
         List<String> carriers = carrierService.getCarriers().stream().map(CarrierResponseDTO::name).toList();
+        List<String> clients = clientService.getClients().stream().map(ClientResponseDTO::name).toList();
         List<IncidentType> incidentTypes = incidentService.getIncidentTypes();
         List<ChargeType> chargeTypes = chargeService.getChargeTypes();
 
@@ -91,7 +96,7 @@ public class ShipmentInitializer implements CommandLineRunner {
                     randomFrom(TRANSPORT_METHODS),
                     randomFrom(customerAgents),
                     randomFrom(TYPE_OF_SERVICES),
-                    "DACHSER CATHERINE",
+                   randomFrom(clients),
                     "Colima, Manzanillo",
                     "Customs Agent " + sequence,
                     "Guadalajara, Jalisco",
@@ -168,7 +173,8 @@ public class ShipmentInitializer implements CommandLineRunner {
             // Close some shipments
             if (sequence % 3 == 0) { // Close every 3rd shipment, has rating from 1-10
 //            if (true) {
-                String closedShipmentViazID = shipmentService.closeShipment(viazId, random.nextInt(1, 11), "Closed for testing");
+                String closedShipmentViazID = shipmentService.closeShipment(viazId, new ShipmentCloseRequestDTO(viazId ,random.nextInt(1, 11), "Closed for testing", random.nextInt(1, 11), "Closed for testing"));
+//                String closedShipmentViazID = shipmentService.closeShipment(viazId, new ShipmentCloseRequestDTO(viazId ,10, "Closed for testing", 0, "Closed for testing"));
                 ratingRepository.updateCreatedDate(shipmentService.getShipmentById(closedShipmentViazID).getRating().getRatingId(), createdDate);
             }
 

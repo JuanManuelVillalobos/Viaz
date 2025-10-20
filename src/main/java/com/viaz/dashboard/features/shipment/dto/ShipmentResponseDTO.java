@@ -1,6 +1,7 @@
 package com.viaz.dashboard.features.shipment.dto;
 
 import com.viaz.dashboard.features.carrier.dto.CarrierResponseDTO;
+import com.viaz.dashboard.features.client.dto.ClientResponseDTO;
 import com.viaz.dashboard.features.rating.Rating;
 import com.viaz.dashboard.features.shipment.Shipment;
 import com.viaz.dashboard.features.user.dto.UserSummaryDTO;
@@ -17,7 +18,7 @@ public record ShipmentResponseDTO(
         String transportMethod,
         UserSummaryDTO customerServiceAgent,
         String typeOfService,
-        String client,
+        ClientResponseDTO client,
         String origin,
         String customsAgent,
         String destination,
@@ -48,17 +49,26 @@ public record ShipmentResponseDTO(
         Boolean open,
         Boolean hasIncidents,
         Boolean hasCharges,
-        Double rating,
-        Double shipmentRating,
-        Double customerServiceRating,
-        String ratingObservation,
+        Double carrierRating,
+        Double clientRating,
+        Double carrierCustomerServiceRating,
+        Double clientCustomerServiceRating,
+        String carrierRatingObservation,
+        String clientRatingObservation,
+        Double shipmentCompleteRating,
         Boolean hasVariants,
         Boolean hasReschedule,
         Boolean deleted
 ) {
 
 
-    public ShipmentResponseDTO(Shipment shipment, double customerServiceRatingWeight, double shipmentRatingWeight) {
+    public ShipmentResponseDTO(
+            Shipment shipment,
+            double carrierRatingWeight,
+            double clientRatingWeight,
+            double carrierCustomerServiceRatingWeight,
+            double clientCustomerServiceRatingWeight
+    ) {
         this(
                 shipment.getBaseViazId(),
                 shipment.getFullViazId(),
@@ -69,7 +79,9 @@ public record ShipmentResponseDTO(
                         new UserSummaryDTO(shipment.getCustomerServiceAgent().getUserId(), shipment.getCustomerServiceAgent().getUsername()) :
                         null,
                 shipment.getTypeOfService(),
-                shipment.getClient(),
+                shipment.getClient() != null ?
+                        new ClientResponseDTO(shipment.getClient().getClientId(), shipment.getClient().getName()) :
+                        null,
                 shipment.getOrigin(),
                 shipment.getCustomsAgent(),
                 shipment.getDestination(),
@@ -102,10 +114,13 @@ public record ShipmentResponseDTO(
                 shipment.getOpen(),
                 shipment.getIncidents() != null && !shipment.getIncidents().isEmpty(),
                 shipment.getCharges() != null && !shipment.getCharges().isEmpty(),
-                calculateCombinedRating(shipment, customerServiceRatingWeight, shipmentRatingWeight),
-                calculateShipmentRating(shipment),
-                calculateCustomerServiceRating(shipment),
-                getRatingObservations(shipment),
+                getCarrierRating(shipment),
+                getClientRating(shipment),
+                getCarrierCustomerServiceRating(shipment),
+                getClientCustomerServiceRating(shipment),
+                getCarrierRatingObservation(shipment),
+                getClientRatingObservation(shipment),
+                calculateCombinedRating(shipment, carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight),
                 shipment.getVariants() != null && !shipment.getVariants().isEmpty(),
                 shipment.getIncidents() != null &&
                         shipment.getIncidents().stream()
@@ -115,26 +130,66 @@ public record ShipmentResponseDTO(
         );
     }
 
-    private static Double calculateCombinedRating(Shipment shipment, double customerServiceRatingWeight, double shipmentRatingWeight) {
+    private static Double calculateCombinedRating(
+            Shipment shipment,
+            double carrierRatingWeight,
+            double clientRatingWeight,
+            double carrierCustomerServiceRatingWeight,
+            double clientCustomerServiceRatingWeight
+    ) {
         Rating rating = shipment.getRating();
         if (rating == null) return null;
-        double customerServiceRating = rating.getCustomerServiceRating() != null ? rating.getCustomerServiceRating() : 0.0;
-        double shipmentRating = rating.getShipmentRating() != null ? rating.getShipmentRating() : 0.0;
-        return customerServiceRating * customerServiceRatingWeight + shipmentRating * shipmentRatingWeight;
+
+        double totalRating = 0.0;
+        double totalWeight = 0.0;
+
+        if (rating.getCarrierRating() != null) {
+            totalRating += rating.getCarrierRating() * carrierRatingWeight;
+            totalWeight += carrierRatingWeight;
+        }
+        if (rating.getClientRating() != null) {
+            totalRating += rating.getClientRating() * clientRatingWeight;
+            totalWeight += clientRatingWeight;
+        }
+        if (rating.getCarrierCustomerServiceRating() != null) {
+            totalRating += rating.getCarrierCustomerServiceRating() * carrierCustomerServiceRatingWeight;
+            totalWeight += carrierCustomerServiceRatingWeight;
+        }
+        if (rating.getClientCustomerServiceRating() != null) {
+            totalRating += rating.getClientCustomerServiceRating() * clientCustomerServiceRatingWeight;
+            totalWeight += clientCustomerServiceRatingWeight;
+        }
+
+        return totalWeight > 0 ? totalRating / totalWeight : null;
     }
 
-    private static Double calculateShipmentRating(Shipment shipment) {
+    private static Double getCarrierRating(Shipment shipment) {
         Rating rating = shipment.getRating();
-        return rating != null ? rating.getShipmentRating() : null;
+        return rating != null ? rating.getCarrierRating() : null;
     }
 
-    private static Double calculateCustomerServiceRating(Shipment shipment) {
+    private static Double getClientRating(Shipment shipment) {
         Rating rating = shipment.getRating();
-        return rating != null ? rating.getCustomerServiceRating() : null;
+        return rating != null ? rating.getClientRating() : null;
     }
 
-    private static String getRatingObservations(Shipment shipment) {
+    private static Double getCarrierCustomerServiceRating(Shipment shipment) {
         Rating rating = shipment.getRating();
-        return rating != null ? rating.getRatingObservation() : null;
+        return rating != null ? rating.getCarrierCustomerServiceRating() : null;
+    }
+
+    private static Double getClientCustomerServiceRating(Shipment shipment) {
+        Rating rating = shipment.getRating();
+        return rating != null ? rating.getClientCustomerServiceRating() : null;
+    }
+
+    private static String getCarrierRatingObservation(Shipment shipment) {
+        Rating rating = shipment.getRating();
+        return rating != null ? rating.getCarrierRatingObservation() : null;
+    }
+
+    private static String getClientRatingObservation(Shipment shipment) {
+        Rating rating = shipment.getRating();
+        return rating != null ? rating.getClientRatingObservation() : null;
     }
 }

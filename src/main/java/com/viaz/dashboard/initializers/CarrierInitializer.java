@@ -22,15 +22,15 @@ public class CarrierInitializer {
 
     private static final List<String> DEFAULT_CARRIERS = List.of(
             "Transportes del Norte",
-            "Fletes y Mudanzas Express"
-//            "Logística Integral MX",
-//            "Carga Segura",
-//            "Autotransportes del Pacífico",
-//            "Rapid Freight",
-//            "Movil Cargo",
-//            "Transmex",
-//            "LogiTrack",
-//            "Global Haulers"
+            "Fletes y Mudanzas Express",
+            "Logística Integral MX",
+            "Carga Segura",
+            "Autotransportes del Pacífico",
+            "Rapid Freight",
+            "Movil Cargo",
+            "Transmex",
+            "LogiTrack",
+            "Global Haulers"
     );
 
     @PostConstruct

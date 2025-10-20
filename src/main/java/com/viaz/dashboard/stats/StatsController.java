@@ -66,4 +66,9 @@ public class StatsController {
     public Integer getNumberOfChargesInLastMonth(){
         return statsService.getNumberOfChargesLastMonth();
     }
+
+    @GetMapping("/get-monthly-ratings-of-client/{clientId}")
+    public List<MonthlyRatingDTO> getMonthlyRatingsOfClient(@PathVariable Long clientId) {
+        return statsService.getMonthlyAverageRatingsForClient(clientId);
+    }
 }

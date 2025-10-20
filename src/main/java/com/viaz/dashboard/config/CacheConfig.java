@@ -62,6 +62,12 @@ public class CacheConfig {
                         .recordStats()
                         .build()),
 
+                new CaffeineCache("monthlyRatingsForClient", Caffeine.newBuilder()
+                        .maximumSize(100)
+                        .expireAfterWrite(15, TimeUnit.MINUTES)
+                        .recordStats()
+                        .build()),
+
 
                 new CaffeineCache("s3Objects", Caffeine.newBuilder()
                         .maximumSize(100)

@@ -2,6 +2,8 @@ package com.viaz.dashboard.features.charge;
 
 import com.viaz.dashboard.features.shipment.charge.ShipmentChargeRepository;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
+import com.viaz.dashboard.initializers.lists.ChargeList;
+import com.viaz.dashboard.initializers.lists.IncidentList;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,16 +25,31 @@ public class ChargeService {
         return chargeTypeRepository.findByName(name);
     }
 
-    public void createChargeOrThrow(String name, double penalty) {
-        if (name == null) {
-            throw new IllegalArgumentException("Charge name cannot be empty");
+    public void createChargeOrThrow(String name, double penalty, String entityTied) {
+        if (name == null){
+            throw new IllegalArgumentException("Incident name cannot be empty");
+        }
+        if (entityTied == null){
+            throw new IllegalArgumentException("Incident entity tied cannot be empty");
         }
         if (!getChargeByName(name).isEmpty()) {
-            throw new RuntimeException("Charge already exists");
+            throw new RuntimeException("Incident already exists");
         }
+        ChargeList.TypeOfEntityRelation typeOfEntityRelation = null;
+        if(entityTied.equals("carrier")){
+            typeOfEntityRelation = ChargeList.TypeOfEntityRelation.CARRIER;
+        } else if (entityTied.equals("client")) {
+            typeOfEntityRelation = ChargeList.TypeOfEntityRelation.CLIENT;
+        }
+
+        if(typeOfEntityRelation == null){
+            throw new IllegalArgumentException("Incorrect entity tied");
+        }
+
         ChargeType charge = ChargeType.builder()
                 .name(name)
                 .penalty(penalty)
+                .entityTied(typeOfEntityRelation)
                 .build();
 
         chargeTypeRepository.save(charge);

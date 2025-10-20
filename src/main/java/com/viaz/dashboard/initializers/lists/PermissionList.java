@@ -36,6 +36,11 @@ public enum PermissionList {
     CARRIER_DELETE("CARRIER_DELETE", "Delete carriers", "CARRIER", "DELETE"),
     CARRIER_MANAGE("CARRIER_MANAGE", "Full carrier management", "CARRIER", "MANAGE"),
 
+    CLIENT_READ("CLIENT_READ", "Read client information", "CLIENT", "READ"),
+    CLIENT_WRITE("CLIENT_WRITE", "Create and update clients", "CLIENT", "WRITE"),
+    CLIENT_DELETE("CLIENT_DELETE", "Delete clients", "CLIENT", "DELETE"),
+    CLIENT_MANAGE("CLIENT_MANAGE", "Full client management", "CLIENT", "MANAGE"),
+
     INCIDENT_MANAGE("INCIDENT_MANAGE", "Full incident management", "INCIDENT", "MANAGE"),
     CHARGE_MANAGE("CHARGE_MANAGE", "Full charge management", "CHARGE", "MANAGE");
     // Getters

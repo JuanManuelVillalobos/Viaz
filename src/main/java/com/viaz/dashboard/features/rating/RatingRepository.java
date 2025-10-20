@@ -16,16 +16,16 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
 
     @Query(value = """
-            SELECT 
+            SELECT\s
                 r.carrier AS carrier_id,
-                TO_CHAR(r.created_date, 'Mon') AS month,
-                DATE_PART('month', r.created_date) AS month_number,
-                ROUND(AVG(r.shipment_rating)::numeric, 2) AS avg_shipment_rating,
-                ROUND(AVG(r.customer_service_rating)::numeric, 2) AS avg_customer_service_rating
+                TO_CHAR(DATE_TRUNC('month', r.created_date), 'Mon') AS month,
+                EXTRACT(MONTH FROM r.created_date) AS month_number,
+                ROUND(AVG(r.carrier_rating)::numeric, 2) AS avg_carrier_rating,
+                ROUND(AVG(r.carrier_customer_service_rating)::numeric, 2) AS avg_carrier_customer_service_rating
             FROM ratings r
             WHERE r.created_date >= now() - interval '6 months'
-            GROUP BY r.carrier, TO_CHAR(r.created_date, 'Mon'), DATE_PART('month', r.created_date)
-            ORDER BY r.carrier, month_number
+            GROUP BY r.carrier, DATE_TRUNC('month', r.created_date), EXTRACT(MONTH FROM r.created_date)
+            ORDER BY r.carrier, month_number;
             """, nativeQuery = true)
     List<Object[]> findMonthlyAverageRatingsForAllCarriers();
 
@@ -35,8 +35,8 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
                 r.carrier AS carrier_id,
                 TO_CHAR(r.created_date, 'Mon') AS month,
                 DATE_PART('month', r.created_date) AS month_number,
-                r.shipment_rating,
-                r.customer_service_rating
+                r.carrier_rating,
+                r.carrier_customer_service_rating
             FROM ratings r
             WHERE r.created_date >= now() - interval '6 months'
               AND r.carrier = :carrierId
@@ -52,4 +52,17 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     void updateCreatedDate(@Param("id") Long id, @Param("createdDate") Instant createdDate);
 
 
+    @Query(value = """
+            SELECT
+                r.client AS client_id,
+                TO_CHAR(r.created_date, 'Mon') AS month,
+                DATE_PART('month', r.created_date) AS month_number,
+                r.client_rating,
+                r.client_customer_service_rating
+            FROM ratings r
+            WHERE r.created_date >= now() - interval '6 months'
+              AND r.client = :clientId
+            ORDER BY month_number
+            """, nativeQuery = true)
+    List<Object[]> findRatingsForClient(@Param("clientId") Long clientId);
 }

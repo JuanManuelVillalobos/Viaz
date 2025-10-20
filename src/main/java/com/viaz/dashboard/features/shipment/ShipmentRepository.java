@@ -15,7 +15,7 @@ import org.springframework.cache.annotation.Cacheable;
 @Repository
 public interface ShipmentRepository extends JpaRepository<Shipment, Long>, JpaSpecificationExecutor<Shipment> {
 
-    @EntityGraph(attributePaths = {"customerServiceAgent", "transport", "incidents.incidentType", "charges.chargeType", "rating", "variants"})
+    @EntityGraph(attributePaths = {"client", "customerServiceAgent", "transport", "incidents.incidentType", "charges.chargeType", "rating", "variants"})
     @Cacheable(value = "shipment", key = "#viazId")
     Optional<Shipment> findByFullViazId(String viazId);
 
@@ -43,7 +43,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long>, JpaSp
     @Query("SELECT DISTINCT s.status FROM Shipment s WHERE s.status IS NOT NULL")
     List<String> findDistinctStatuses();
 
-    @Query("SELECT DISTINCT s.client FROM Shipment s WHERE s.client IS NOT NULL")
+    @Query("SELECT DISTINCT t.name FROM Shipment s JOIN s.client t WHERE t.name IS NOT NULL")
     List<String> findDistinctClients();
 
     @Query("SELECT DISTINCT t.name FROM Shipment s JOIN s.transport t WHERE t.name IS NOT NULL")
@@ -87,4 +87,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long>, JpaSp
     List<Shipment> findAllByCleaningOrderIsIgnoreCase(String cleaningOrder);
 
     Integer countShipmentsByOpenTrue();
+
+    boolean existsShipmentByClientClientId(Long clientClientId);
 }

@@ -1,6 +1,7 @@
 package com.viaz.dashboard.features.shipment;
 
 import com.viaz.dashboard.features.carrier.Carrier;
+import com.viaz.dashboard.features.client.Client;
 import com.viaz.dashboard.features.rating.Rating;
 import com.viaz.dashboard.features.shipment.charge.ShipmentCharge;
 import com.viaz.dashboard.features.shipment.incident.ShipmentIncident;
@@ -72,8 +73,11 @@ public class Shipment {
     @Column(name = "type_of_service")
     private String typeOfService;
 
-    @Column(name = "client")
-    private String client;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client",
+            referencedColumnName = "client_id"
+    )
+    private Client client;
 
     @Column(name = "origin")
     private String origin;

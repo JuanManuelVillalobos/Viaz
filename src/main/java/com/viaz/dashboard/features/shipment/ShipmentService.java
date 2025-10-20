@@ -4,6 +4,8 @@ import com.viaz.dashboard.features.carrier.Carrier;
 import com.viaz.dashboard.features.carrier.CarrierService;
 import com.viaz.dashboard.features.charge.ChargeService;
 import com.viaz.dashboard.features.charge.ChargeType;
+import com.viaz.dashboard.features.client.Client;
+import com.viaz.dashboard.features.client.ClientService;
 import com.viaz.dashboard.features.incident.IncidentService;
 import com.viaz.dashboard.features.incident.IncidentType;
 import com.viaz.dashboard.features.notification.NotificationService;
@@ -12,10 +14,7 @@ import com.viaz.dashboard.features.rating.RatingService;
 import com.viaz.dashboard.features.shipment.charge.ShipmentCharge;
 import com.viaz.dashboard.features.shipment.charge.dto.ShipmentChargeResponseDTO;
 import com.viaz.dashboard.features.shipment.charge.ShipmentChargeService;
-import com.viaz.dashboard.features.shipment.dto.ShipmentExcelDTO;
-import com.viaz.dashboard.features.shipment.dto.ShipmentFilterOptionsDTO;
-import com.viaz.dashboard.features.shipment.dto.ShipmentResponseDTO;
-import com.viaz.dashboard.features.shipment.dto.ShipmentRequestDTO;
+import com.viaz.dashboard.features.shipment.dto.*;
 import com.viaz.dashboard.features.shipment.incident.ShipmentIncident;
 import com.viaz.dashboard.features.shipment.incident.dto.ShipmentIncidentResponseDTO;
 import com.viaz.dashboard.features.shipment.incident.ShipmentIncidentService;
@@ -25,6 +24,8 @@ import com.viaz.dashboard.features.user.UserService;
 import com.viaz.dashboard.features.user.ViazUser;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
+import com.viaz.dashboard.initializers.lists.ChargeList;
+import com.viaz.dashboard.initializers.lists.IncidentList;
 import com.viaz.dashboard.s3.S3Service;
 import com.viaz.dashboard.features.shipment.idGenerator.ShipmentIdGeneratorService;
 import jakarta.transaction.Transactional;
@@ -80,19 +81,26 @@ public class ShipmentService {
     private final NotificationService notificationService;
     private final ShipmentSubscriptionService shipmentSubscriptionService;
     private final CacheManager cacheManager;
+    private final ClientService clientService;
 
 
-    @Value("${rating.weight.customerService}")
-    private double customerServiceRatingWeight;
-
-    @Value("${rating.weight.shipment}")
-    private double shipmentRatingWeight;
+    @Value("${rating.weight.clientCustomerService}")
+    private double clientCustomerServiceRatingWeight;
+    
+    @Value("${rating.weight.carrierCustomerService}")
+    private double carrierCustomerServiceRatingWeight;
+    
+    @Value("${rating.weight.carrier}")
+    private double carrierRatingWeight;
+    
+    @Value("${rating.weight.client}")
+    private double clientRatingWeight;
 
 
     @Transactional
     public ShipmentResponseDTO getShipmentByIdDTO(String viazId) {
         Shipment shipment = shipmentRepository.findByFullViazId(viazId).orElseThrow(() -> new ResourceNotFoundException("Shipment not found"));
-        return new ShipmentResponseDTO(shipment, customerServiceRatingWeight, shipmentRatingWeight);
+        return new ShipmentResponseDTO(shipment, carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight);
     }
 
     //    ONLY USE ON GETTER FUNCTIONS, WHEN MODIFYING ALWAYS GET SHIPMENT FROM REPOSITORY
@@ -114,16 +122,17 @@ public class ShipmentService {
             List<String> statuses,
             List<String> clients,
             List<String> carriers,
+            List<String> customerServiceAgent,
             String search
     ) {
-        Specification<Shipment> spec = ShipmentSpecifications.buildSpec(statuses, clients, carriers, search);
+        Specification<Shipment> spec = ShipmentSpecifications.buildSpec(statuses, clients, carriers, customerServiceAgent, search);
 
         spec = spec.and(notDeleted());
 
         PageRequest pageable = PageRequest.of(page, size, Sort.by("fullViazId").descending());
 
         return shipmentRepository.findAll(spec, pageable)
-                .map(shipment -> new ShipmentResponseDTO(shipment, customerServiceRatingWeight, shipmentRatingWeight));
+                .map(shipment -> new ShipmentResponseDTO(shipment, carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight));
     }
 
     @Caching(evict = {
@@ -135,6 +144,7 @@ public class ShipmentService {
 
         Carrier carrier = null;
         ViazUser viazUser = null;
+        Client client = null;
         try {
             carrier = carrierService.getCarrierByNameOrThrow(shipmentRequestDTO.transport());
         } catch (Exception ignored) {
@@ -145,8 +155,14 @@ public class ShipmentService {
         } catch (Exception ignored) {
         }
 
+        try {
+            client = clientService.getClientByNameOrThrow(shipmentRequestDTO.client());
+        } catch (Exception ignored) {
+        }
+
         shipment.setTransport(carrier);
         shipment.setCustomerServiceAgent(viazUser);
+        shipment.setClient(client);
 
         BeanUtils.copyProperties(shipmentRequestDTO, shipment);
 
@@ -156,7 +172,7 @@ public class ShipmentService {
         shipment.setBaseViazId(viazId);
         shipment.setYear(Year.now().getValue());
         shipment.setSequence(extractSequenceFromId(shipment.getFullViazId()));
-        ShipmentResponseDTO newShipment = new ShipmentResponseDTO(shipmentRepository.save(shipment), customerServiceRatingWeight, shipmentRatingWeight);
+        ShipmentResponseDTO newShipment = new ShipmentResponseDTO(shipmentRepository.save(shipment), carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight);
         log.info("New shipment created: {}", newShipment.fullViazId());
         if (viazUser != null) {
             notificationService.createNotification(viazUser, "Nuevo embarque asignado con id " + shipment.getFullViazId());
@@ -204,9 +220,13 @@ public class ShipmentService {
         Set<String> excludedFields = Set.of(
                 "hasIncidents",
                 "hasCharges",
-                "shipmentRating",
-                "customerServiceRating",
-                "ratingObservation",
+                "carrierRating",
+                "clientRating",
+                "carrierCustomerServiceRating",
+                "clientCustomerServiceRating",
+                "carrierRatingObservation",
+                "clientRatingObservation",
+                "shipmentCompleteRating",
                 "hasVariants",
                 "rating"
         );
@@ -242,6 +262,13 @@ public class ShipmentService {
                             newValue = carrierService.getCarrierByNameOrThrow((String) value);
                         } else {
                             log.warn("Field '{}' expects Carrier, but value is not a String", key);
+                        }
+
+                    } else if (fieldType == Client.class) {
+                        if (value instanceof String) {
+                            newValue = clientService.getClientByNameOrThrow((String) value);
+                        } else {
+                            log.warn("Field '{}' expects Client, but value is not a String", key);
                         }
 
                     } else if (fieldType == LocalDateTime.class) {
@@ -317,7 +344,7 @@ public class ShipmentService {
             shipmentSubscriptionService.notifySubscribers(existingShipment, message);
         }
 
-        return new ShipmentResponseDTO(getShipmentById(viazId), customerServiceRatingWeight, shipmentRatingWeight); // Return the updated shipment
+        return new ShipmentResponseDTO(getShipmentById(viazId), carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight); // Return the updated shipment
     }
 
 
@@ -328,12 +355,12 @@ public class ShipmentService {
      * @return the sequence number extracted from the ID
      */
     private int extractSequenceFromId(String viazID) {
-        // Split the shipment ID by the "-" character and extract the third part (sequence)
+        // Split the shipment ID by the "-" character and extract the second part (sequence)
         String[] parts = viazID.split("-");
 
-        // The sequence should be the third part of the split array
-        if (parts.length == 3) {
-            return Integer.parseInt(parts[2]); // Parse and return the sequence part
+        // The sequence should be the second part of the split array
+        if (parts.length == 2) {
+            return Integer.parseInt(parts[1]); // Parse and return the sequence part
         } else {
             throw new IllegalArgumentException("Invalid shipment ID format: " + viazID);
         }
@@ -502,29 +529,45 @@ public class ShipmentService {
     @Caching(evict = {
             @CacheEvict(value = "shipmentsPageCache", allEntries = true),
             @CacheEvict(value = "openShipmentsPageCache", allEntries = true),
-            @CacheEvict(value = "shipment", key = "#viazId")
+            @CacheEvict(value = "shipment", key = "#fullViazId")
     })
     @Transactional
-    public String closeShipment(@NonNull String viazId, @NonNull Integer customerServiceRating, String observations) {
-        Shipment shipment = getShipmentById(viazId);
+    public String closeShipment(String fullViazId, ShipmentCloseRequestDTO request) {
+        Integer customerServiceCarrierRating = request.carrierRating();
+        String carrierObservations = request.carrierObservations();
+
+        Integer customerServiceClientRating = request.clientRating();
+        String clientObservations = request.clientObservations();
+
+
+        Shipment shipment = getShipmentById(fullViazId);
 
         if (shipment == null) {
-            throw new ResourceNotFoundException("Shipment not found with viazId: " + viazId);
+            throw new ResourceNotFoundException("Shipment not found with viazId: " + fullViazId);
         }
 
-        double shipmentRating = calculateShipmentRating(shipment);
+        double carrierRating = calculateRating(shipment, IncidentList.TypeOfEntityRelation.CARRIER, ChargeList.TypeOfEntityRelation.CARRIER);
+        double clientRating = calculateRating(shipment, IncidentList.TypeOfEntityRelation.CLIENT, ChargeList.TypeOfEntityRelation.CLIENT);
 
         Rating existingRating = shipment.getRating();
 
         if (existingRating != null) {
             // Update existing rating
-            existingRating.setCustomerServiceRating((double) customerServiceRating);
-            existingRating.setShipmentRating(shipmentRating);
-            existingRating.setRatingObservation(observations);
+//            Shipment Related
+            existingRating.setCarrierRating(carrierRating);
+            existingRating.setClientRating(clientRating);
+
+//            Customer Service Related
+            existingRating.setCarrierCustomerServiceRating((double) customerServiceCarrierRating);
+            existingRating.setClientCustomerServiceRating((double) customerServiceClientRating);
+
+            existingRating.setCarrierRatingObservation(carrierObservations);
+            existingRating.setClientRatingObservation(clientObservations);
+
             ratingService.saveRating(existingRating);
         } else {
             // Create a new rating
-            Rating newRating = ratingService.createRating(shipment, (double) customerServiceRating, shipmentRating, observations);
+            Rating newRating = ratingService.createRating(shipment, customerServiceCarrierRating, carrierObservations, carrierRating , customerServiceClientRating, clientObservations, clientRating);
             shipment.setRating(newRating);
         }
 
@@ -534,15 +577,15 @@ public class ShipmentService {
         return shipment.getFullViazId();
     }
 
-    public double calculateShipmentRating(Shipment shipment) {
+    public double calculateRating(Shipment shipment, IncidentList.TypeOfEntityRelation incidentRelation, ChargeList.TypeOfEntityRelation chargeRelation) {
         double maxRating = 10;
         final double MAX_TOTAL_PENALTY = 10.0;
-        double totalIncidentPenalty = shipmentIncidentService.getCarrierIncidentsByShipment(shipment)
+        double totalIncidentPenalty = shipmentIncidentService.getIncidentsByShipmentTypeOfEntity(shipment, incidentRelation)
                 .stream().mapToDouble(
                         incident -> incident.getIncidentType().getPenalty()
                 ).sum();
 
-        double totalChargePenalty = shipmentChargeService.getChargesByShipment(shipment)
+        double totalChargePenalty = shipmentChargeService.getChargesByShipmentTypeOfEntity(shipment, chargeRelation)
                 .stream().mapToDouble(
                         incident -> incident.getChargeType().getPenalty()
                 ).sum();
@@ -605,7 +648,7 @@ public class ShipmentService {
     public List<ShipmentIncidentResponseDTO> getIncidentsByViazId(String viazId) {
         Shipment shipment = getShipmentById(viazId);
 
-        return shipmentIncidentService.getCarrierIncidentsByShipment(shipment).stream().map(ShipmentIncidentResponseDTO::new).collect(Collectors.toList());
+        return shipmentIncidentService.getIncidentsByShipment(shipment).stream().map(ShipmentIncidentResponseDTO::new).collect(Collectors.toList());
     }
 
     @Transactional
@@ -792,9 +835,10 @@ public class ShipmentService {
             List<String> statuses,
             List<String> clients,
             List<String> carriers,
+            List<String> customerServiceAgent,
             String search
     ) {
-        Specification<Shipment> baseSpec = ShipmentSpecifications.buildSpec(statuses, clients, carriers, search);
+        Specification<Shipment> baseSpec = ShipmentSpecifications.buildSpec(statuses, clients, carriers, customerServiceAgent, search);
 
         Specification<Shipment> openSpec = (root, query, criteriaBuilder) ->
                 criteriaBuilder.isTrue(root.get("open"));  // filter where open == true
@@ -807,7 +851,7 @@ public class ShipmentService {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("fullViazId").descending());
 
         return shipmentRepository.findAll(combinedSpec, pageable)
-                .map(shipment -> new ShipmentResponseDTO(shipment, customerServiceRatingWeight, shipmentRatingWeight));
+                .map(shipment -> new ShipmentResponseDTO(shipment, carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight));
     }
 
     public void notifyCustomerServiceThatCleaningManuovreIsPending() {
@@ -859,7 +903,7 @@ public class ShipmentService {
                 int cellIdx = 0;
                 row.createCell(cellIdx++).setCellValue(dto.fullViazId());
                 row.createCell(cellIdx++).setCellValue(dto.status());
-                row.createCell(cellIdx++).setCellValue(dto.client());
+                row.createCell(cellIdx++).setCellValue(dto.clientName());
                 row.createCell(cellIdx++).setCellValue(dto.transportName());
                 row.createCell(cellIdx++).setCellValue(dto.origin());
                 row.createCell(cellIdx++).setCellValue(dto.destination());
@@ -918,13 +962,14 @@ public class ShipmentService {
             List<String> statuses,
             List<String> clients,
             List<String> carriers,
+            List<String> customerServiceAgent,
             String search
     ) {
         ViazUserDetails currentUserDetails = (ViazUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ViazUser currentUser = currentUserDetails.viazUser();
 
         // Optional filters like status, client, carrier, search
-        Specification<Shipment> baseSpec = ShipmentSpecifications.buildSpec(statuses, clients, carriers, search);
+        Specification<Shipment> baseSpec = ShipmentSpecifications.buildSpec(statuses, clients, carriers, customerServiceAgent, search);
 
         // Only open shipments
         Specification<Shipment> openSpec = (root, query, cb) ->
@@ -949,7 +994,7 @@ public class ShipmentService {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("fullViazId").descending());
 
         return shipmentRepository.findAll(combinedSpec, pageable)
-                .map(shipment -> new ShipmentResponseDTO(shipment, customerServiceRatingWeight, shipmentRatingWeight));
+                .map(shipment -> new ShipmentResponseDTO(shipment, carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight));
 
     }
 }

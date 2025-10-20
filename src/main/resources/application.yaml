@@ -43,7 +43,7 @@ spring:
           org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: false
   ###
 
@@ -96,8 +96,10 @@ jwt:
 ### RATING WEIGHTS
 rating:
   weight:
-    customerService: ${CUSTOMER_SERVICE_RATING_WEIGHT:0.5}
-    shipment: ${SHIPMENT_RATING_WEIGHT:0.5}
+    carrier: ${CARRIER_RATING_WEIGHT:0.25}
+    client: ${CLIENT_RATING_WEIGHT:0.25}
+    carrierCustomerService: ${CARRIER_CUSTOMER_SERVICE_RATING_WEIGHT:0.25}
+    clientCustomerService: ${CLIENT_CUSTOMER_SERVICE_RATING_WEIGHT:0.25}
 ###
 
 ### Default user after start
