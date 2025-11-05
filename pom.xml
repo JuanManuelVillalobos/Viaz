@@ -236,7 +236,7 @@
                 <version>3.3.1</version>
                 <configuration>
                     <from>
-                        <image>openjdk:21</image>
+                        <image>eclipse-temurin:21-jdk</image>
                     </from>
                     <container>
                         <ports>

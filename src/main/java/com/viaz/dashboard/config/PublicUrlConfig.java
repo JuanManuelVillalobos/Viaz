@@ -16,7 +16,7 @@ public class PublicUrlConfig {
     private final List<RequestMatcher> publicMatchers = List.of(
             PathPatternRequestMatcher.withDefaults().matcher("/api/shipment/upload-excel"),
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/login"),
-            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/forgot-password"),
+            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/forgot-password/*"),
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/set-password"),
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/refresh-token")
     );

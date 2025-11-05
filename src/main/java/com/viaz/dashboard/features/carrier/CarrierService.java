@@ -3,11 +3,14 @@ package com.viaz.dashboard.features.carrier;
 import com.viaz.dashboard.features.carrier.dto.CarrierDetailsDTO;
 import com.viaz.dashboard.features.carrier.dto.CarrierRequestDTO;
 import com.viaz.dashboard.features.carrier.dto.CarrierResponseDTO;
-import com.viaz.dashboard.features.shipment.ShipmentRepository;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
+import com.viaz.dashboard.features.user.UserRepository;
+import com.viaz.dashboard.features.user.ViazUser;
+import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -22,7 +25,7 @@ import java.util.stream.Collectors;
 public class CarrierService {
 
     private final CarrierRepository carrierRepository;
-    private final ShipmentRepository shipmentRepository;
+    private final UserRepository userRepository;
 
     public void createCarrier(CarrierRequestDTO carrier) {
         if (carrier == null) {
@@ -39,11 +42,11 @@ public class CarrierService {
     }
 
     public List<CarrierResponseDTO> getCarriers() {
-        return carrierRepository.findAll().stream().map(this::carrierToDTO).collect(Collectors.toList());
+        return carrierRepository.findAll().stream().filter(carrier -> !carrier.isDeleted()).map(this::carrierToDTO).collect(Collectors.toList());
     }
 
     public List<CarrierDetailsDTO> getCarriersWithSensitiveFields() {
-        return carrierRepository.findAll().stream().map(CarrierDetailsDTO::new).collect(Collectors.toList());
+        return carrierRepository.findAll().stream().filter(carrier -> !carrier.isDeleted()).map(CarrierDetailsDTO::new).collect(Collectors.toList());
     }
 
     public Optional<Carrier> getOptionalByName(String name) {
@@ -55,15 +58,6 @@ public class CarrierService {
                 .orElseThrow(() -> new ResourceNotFoundException("Carrier not found: " + name));
     }
 
-
-    public ResponseEntity<String> changeCarrierName(Long carrierId, String newname) {
-        String oldname = carrierRepository.findById(carrierId).getClass().getName();
-        carrierRepository.findById(carrierId).ifPresent(carrier -> {
-            carrier.setName(newname);
-            carrierRepository.save(carrier);
-        });
-        return ResponseEntity.ok(String.format("Transporte %s renombrado como %s exitosamente.", oldname, newname));
-    }
 
     public CarrierResponseDTO carrierToDTO(Carrier carrier) {
         return new CarrierResponseDTO(carrier.getCarrierId(), carrier.getName());
@@ -104,9 +98,6 @@ public class CarrierService {
                         break;
 
                     case "rfc":
-                        if (stringValue.length() != 10) {
-                            throw new IllegalArgumentException("RFC must be exactly 10 characters");
-                        }
                         field.set(existingCarrier, stringValue);
                         break;
 
@@ -143,11 +134,16 @@ public class CarrierService {
             throw new IllegalArgumentException("Carrier with ID " + carrierId + " does not exist");
         }
 
-        if(shipmentRepository.existsShipmentByTransportCarrierId(carrierId)){
-            throw new IllegalStateException("Cannot delete carrier with shipments");
-        }
+        Carrier carrier = carrierRepository.getCarrierByCarrierId(carrierId);
 
-        carrierRepository.deleteByCarrierId(carrierId);
+//        Get auth
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        ViazUserDetails viazUserDetails = (ViazUserDetails) auth.getPrincipal();
+        ViazUser currentUser = userRepository.findByUsername(viazUserDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+
+        carrier.softDelete(currentUser);
+        carrierRepository.save(carrier);
     }
 
     public String getCarrierNameById(Long carrierId) {

@@ -45,6 +45,7 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+    defer-datasource-initialization: true
   ###
 
 
@@ -84,6 +85,7 @@ logging:
     org.springframework.mail: debug
     org.springframework.web.socket: debug
     org.springframework.messaging: debug
+    org.springframework.cache: debug
 
   ###
 

@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 
 @ToString
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -23,6 +22,8 @@ import java.util.UUID;
     }
 )
 public class BlacklistedToken {
+
+    @EqualsAndHashCode.Include
     @Id
     private UUID id;
 

@@ -13,5 +13,5 @@ public interface CarrierRepository extends JpaRepository<Carrier, Long> {
     String getCarrierNameByCarrierId(@Param("carrierId") Long carrierId);
 
 
-    void deleteByCarrierId(Long carrierId);
+    Carrier getCarrierByCarrierId(Long carrierId);
 }

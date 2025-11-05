@@ -1,14 +1,12 @@
 package com.viaz.dashboard.features.shipment;
 
 import com.viaz.dashboard.features.shipment.charge.dto.ShipmentChargeResponseDTO;
-import com.viaz.dashboard.features.shipment.charge.ShipmentChargeService;
 import com.viaz.dashboard.features.shipment.dto.ShipmentCloseRequestDTO;
 import com.viaz.dashboard.features.shipment.dto.ShipmentFilterOptionsDTO;
 import com.viaz.dashboard.features.shipment.dto.ShipmentResponseDTO;
 import com.viaz.dashboard.features.shipment.dto.ShipmentRequestDTO;
 import com.viaz.dashboard.features.shipment.incident.ShipmentIncident;
 import com.viaz.dashboard.features.shipment.incident.dto.ShipmentIncidentResponseDTO;
-import com.viaz.dashboard.features.shipment.incident.ShipmentIncidentService;
 import com.viaz.dashboard.features.shipment.incident.reschedule.ShipmentRescheduleService;
 import com.viaz.dashboard.features.shipment.incident.reschedule.dto.RescheduleRequestDTO;
 import com.viaz.dashboard.features.shipment.incident.reschedule.dto.ShipmentRescheduleResponseDTO;
@@ -33,8 +31,6 @@ import java.util.*;
 @RequestMapping(path = "api/shipment")
 public class ShipmentController {
     private final ShipmentService shipmentService;
-    private final ShipmentIncidentService shipmentIncidentService;
-    private final ShipmentChargeService shipmentChargeService;
     private final ShipmentSubscriptionService shipmentSubscriptionService;
     private final ShipmentRescheduleService shipmentRescheduleService;
 
@@ -84,8 +80,6 @@ public class ShipmentController {
             @RequestParam(required = false) List<String> customerServiceAgent,
             @RequestParam(required = false) String search
     ) {
-
-
         return shipmentService.getAssignedShipments(page, size, statuses, clients, carriers, customerServiceAgent, search);
     }
 

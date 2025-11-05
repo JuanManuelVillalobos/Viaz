@@ -27,7 +27,7 @@ import java.util.Set;
 @ToString
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "shipments")
@@ -35,6 +35,8 @@ import java.util.Set;
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
 public class Shipment {
+
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -98,9 +100,9 @@ public class Shipment {
     private String containerType;
 
     //    Fecha de carga
-    @Column(name = "shipment_date")
+    @Column(name = "shipment__loading_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime shipmentDate;
+    private LocalDateTime shipmentLoadingDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transport",
@@ -142,26 +144,26 @@ public class Shipment {
     private LocalDateTime unloadDate;
 
     //     Maniobra de vacio
-    @Column(name = "cleaning_order")
-    private String cleaningOrder;
+    @Column(name = "emptying_order")
+    private String emptyingOrder;
 
     @Column(name = "pod")
     private String pod;
 
-    @Column(name = "cleaning_patio")
-    private String cleaningPatio;
+    @Column(name = "emptying_patio")
+    private String emptyingPatio;
 
 
-    @Column(name = "has_cleaning_appointment")
-    private Boolean hasCleaningAppointment;
+    @Column(name = "has_emptying_appointment")
+    private Boolean hasEmptyingAppointment;
 
     //    Fecha de Cita de Vacío
-    @Column(name = "cleaning_appointment_date")
+    @Column(name = "emptying_appointment_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime cleaningAppointmentDate;
+    private LocalDateTime emptyingAppointmentDate;
 
-    @Column(name = "clean_arrival_date")
-    private LocalDate cleanArrivalDate;
+    @Column(name = "empty_arrival_date")
+    private LocalDate emptyArrivalDate;
 
     @Column(name = "eir")
     private String eir;
@@ -225,6 +227,12 @@ public class Shipment {
     private Long version;
 
 
+    public void softDelete(ViazUser deletedByUserId) {
+        this.deleted = true;
+        this.deletedAt = Instant.now();
+        this.deletedByUserId = deletedByUserId;
+    }
+
     @PrePersist
     public void generateId() {
         if (fullViazId == null) {
@@ -253,10 +261,6 @@ public class Shipment {
 
     public void close() {
         this.open = false;
-    }
-
-    public void markModified() {
-        this.observations = (this.observations == null ? "" : this.observations) + " ";
     }
 
 

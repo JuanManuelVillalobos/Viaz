@@ -20,6 +20,7 @@ import com.viaz.dashboard.features.shipment.incident.dto.ShipmentIncidentRespons
 import com.viaz.dashboard.features.shipment.incident.ShipmentIncidentService;
 import com.viaz.dashboard.features.shipment.specification.ShipmentSpecifications;
 import com.viaz.dashboard.features.shipment.subscription.ShipmentSubscriptionService;
+import com.viaz.dashboard.features.user.UserRepository;
 import com.viaz.dashboard.features.user.UserService;
 import com.viaz.dashboard.features.user.ViazUser;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
@@ -46,6 +47,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -82,17 +84,18 @@ public class ShipmentService {
     private final ShipmentSubscriptionService shipmentSubscriptionService;
     private final CacheManager cacheManager;
     private final ClientService clientService;
+    private final UserRepository userRepository;
 
 
     @Value("${rating.weight.clientCustomerService}")
     private double clientCustomerServiceRatingWeight;
-    
+
     @Value("${rating.weight.carrierCustomerService}")
     private double carrierCustomerServiceRatingWeight;
-    
+
     @Value("${rating.weight.carrier}")
     private double carrierRatingWeight;
-    
+
     @Value("${rating.weight.client}")
     private double clientRatingWeight;
 
@@ -192,7 +195,14 @@ public class ShipmentService {
     })
     public void deleteShipment(String viazId) {
         Shipment shipment = shipmentRepository.findByFullViazId(viazId).orElseThrow(() -> new ResourceNotFoundException("Shipment not found"));
-        shipment.setDeleted(true);
+
+//        Get User
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        ViazUserDetails viazUserDetails = (ViazUserDetails) auth.getPrincipal();
+        ViazUser currentUser = userRepository.findByUsername(viazUserDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+
+        shipment.softDelete(currentUser);
         shipmentRepository.save(shipment);
         log.info("Shipment with ID {} deleted successfully.", viazId);
     }
@@ -228,7 +238,8 @@ public class ShipmentService {
                 "clientRatingObservation",
                 "shipmentCompleteRating",
                 "hasVariants",
-                "rating"
+                "rating",
+                "hasReschedule"
         );
 
 
@@ -567,7 +578,7 @@ public class ShipmentService {
             ratingService.saveRating(existingRating);
         } else {
             // Create a new rating
-            Rating newRating = ratingService.createRating(shipment, customerServiceCarrierRating, carrierObservations, carrierRating , customerServiceClientRating, clientObservations, clientRating);
+            Rating newRating = ratingService.createRating(shipment, customerServiceCarrierRating, carrierObservations, carrierRating, customerServiceClientRating, clientObservations, clientRating);
             shipment.setRating(newRating);
         }
 
@@ -825,6 +836,7 @@ public class ShipmentService {
     @Cacheable(
             value = "openShipmentsPageCache",
             key = "T(java.util.Objects).hash(#page, #size, " +
+                    "T(java.util.Optional).ofNullable(#statuses).orElse(T(java.util.Collections).emptyList()).stream().sorted().toList(), " +
                     "T(java.util.Optional).ofNullable(#clients).orElse(T(java.util.Collections).emptyList()).stream().sorted().toList(), " +
                     "T(java.util.Optional).ofNullable(#carriers).orElse(T(java.util.Collections).emptyList()).stream().sorted().toList(), " +
                     "#search != null ? #search : '')"
@@ -854,8 +866,8 @@ public class ShipmentService {
                 .map(shipment -> new ShipmentResponseDTO(shipment, carrierRatingWeight, clientRatingWeight, carrierCustomerServiceRatingWeight, clientCustomerServiceRatingWeight));
     }
 
-    public void notifyCustomerServiceThatCleaningManuovreIsPending() {
-        shipmentRepository.findAllByCleaningOrderIsIgnoreCase("pendiente").forEach(shipment -> {
+    public void notifyCustomerServiceThatEmptyingManuovreIsPending() {
+        shipmentRepository.findAllByEmptyingOrderIsIgnoreCase("pendiente").forEach(shipment -> {
             notificationService.createNotification(shipment.getCustomerServiceAgent(), "Embarque " + shipment.getFullViazId() + " pendiente de maniobra de vacío");
         });
     }
@@ -954,6 +966,7 @@ public class ShipmentService {
             key = "T(java.util.Objects).hash(#page, #size, " +
                     "T(java.util.Optional).ofNullable(#clients).orElse(T(java.util.Collections).emptyList()).stream().sorted().toList(), " +
                     "T(java.util.Optional).ofNullable(#carriers).orElse(T(java.util.Collections).emptyList()).stream().sorted().toList(), " +
+                    "T(java.util.Optional).ofNullable(#statuses).orElse(T(java.util.Collections).emptyList()).stream().sorted().toList(), " +
                     "#search != null ? #search : '')"
     )
     public Page<ShipmentResponseDTO> getAssignedShipments(

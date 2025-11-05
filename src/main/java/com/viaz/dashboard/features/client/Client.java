@@ -12,7 +12,7 @@ import java.time.Instant;
 
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "clients")
@@ -20,6 +20,7 @@ import java.time.Instant;
 @Entity
 public class Client {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "client_id")
@@ -58,5 +59,11 @@ public class Client {
     @Override
     public String toString() {
         return String.format("Client %s", name);
+    }
+
+    public void softDelete(ViazUser deletedByUserId) {
+        this.deleted = true;
+        this.deletedAt = Instant.now();
+        this.deletedByUserId = deletedByUserId;
     }
 }
