@@ -43,8 +43,8 @@ public class ScheduledService {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
-    public void notifyCustomerServiceThatCleaningManuovreIsPending() {
-        shipmentService.notifyCustomerServiceThatCleaningManuovreIsPending();
+    public void notifyCustomerServiceThatEmptyingManuovreIsPending() {
+        shipmentService.notifyCustomerServiceThatEmptyingManuovreIsPending();
     }
 
 

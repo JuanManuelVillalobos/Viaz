@@ -27,8 +27,6 @@ import java.time.*;
 import java.util.List;
 import java.util.Random;
 
-import static java.lang.Math.max;
-
 @Slf4j
 @Order(6)
 @Component
@@ -47,7 +45,7 @@ public class ShipmentInitializer implements CommandLineRunner {
     private static final List<String> STATUSES = List.of(
             "Información Pendiente", "Folio Pendiente", "Maniobras Pendientes",
             "Todo Ok", "En Puerto", "En Transito", "En Destino",
-            "POD Pendiente", "Vacío Pendiente", "Ingresado", "Egresado"
+            "POD Pendiente", "Vacío Pendiente", "Ingresado", "Entregado"
     );
     private static final List<String> CONTAINER_TYPES = List.of(
             "40_HC", "20_HC", "40_IMO", "20_IMO", "40_DC", "20_DC",
@@ -55,8 +53,8 @@ public class ShipmentInitializer implements CommandLineRunner {
     );
     private static final List<String> POD_STATUSES = List.of("Pendiente", "Enviado");
     private static final List<String> EIR_STATUSES = List.of("No dieron", "Enviado");
-    private static final List<String> CLEANING_ORDERS = List.of("Solicitada", "Enviada", "Pendiente", "Completada");
-    private static final List<String> CLEANING_PATIOS = List.of("SSA", "TIMSA", "CIMA", "OCUPA", "ISL", "CISE", "Otro");
+    private static final List<String> EMPTYING_ORDER_TYPES = List.of("Solicitada", "Enviada", "Pendiente", "Completada");
+    private static final List<String> EMPTYING_PATIOS = List.of("SSA", "TIMSA", "CIMA", "OCUPA", "ISL", "CISE", "Otro");
     private final UserService userService;
     private final ShipmentRepository shipmentRepository;
     private final IncidentService incidentService;
@@ -82,7 +80,6 @@ public class ShipmentInitializer implements CommandLineRunner {
         }
 
         int totalShipments = 30;
-        int year = 2025;
         Instant startDate = ZonedDateTime.of(
                 2025, 1, 1, 0, 0, 0, 0,
                 ZoneOffset.UTC
@@ -115,9 +112,9 @@ public class ShipmentInitializer implements CommandLineRunner {
                     LocalDate.of(2025, 2, 1).minusDays(sequence),
                     LocalDateTime.now().plusDays(sequence),
                     LocalDateTime.now().plusDays(sequence + 1),
-                    randomFrom(CLEANING_ORDERS),
+                    randomFrom(EMPTYING_ORDER_TYPES),
                     randomFrom(POD_STATUSES),
-                    randomFrom(CLEANING_PATIOS),
+                    randomFrom(EMPTYING_PATIOS),
                     true,
                     LocalDateTime.now().plusDays(sequence + 2),
                     LocalDate.now().plusDays(sequence + 2),

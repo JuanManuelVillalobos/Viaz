@@ -14,7 +14,7 @@ import java.time.Instant;
 
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "carriers")
@@ -22,6 +22,7 @@ import java.time.Instant;
 @Entity
 public class Carrier {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "carrier_id")
@@ -31,7 +32,6 @@ public class Carrier {
     private String name;
 
     @Column(name = "rfc")
-    @Size(min = 10, max = 10, message = "RFC must be 10 characters long")
     private String rfc;
 
     @Column(name = "razon_social")
@@ -50,11 +50,13 @@ public class Carrier {
     @Column(name = "last_modified_date")
     private Instant lastModifiedDate;
 
+    @ToString.Exclude
     @CreatedBy
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
     private ViazUser createdBy;
 
+    @ToString.Exclude
     @LastModifiedBy
     @ManyToOne
     @JoinColumn(name = "last_modified_by_user_id")
@@ -73,6 +75,7 @@ public class Carrier {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "deleted_by_user_id")
     private ViazUser deletedByUserId;
@@ -80,5 +83,11 @@ public class Carrier {
     @Override
     public String toString() {
         return String.format("Carrier %s", name);
+    }
+
+    public void softDelete(ViazUser deletedByUserId) {
+        this.deleted = true;
+        this.deletedAt = Instant.now();
+        this.deletedByUserId = deletedByUserId;
     }
 }

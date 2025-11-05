@@ -11,12 +11,13 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ChargeType {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "charge_id")
@@ -38,8 +39,4 @@ public class ChargeType {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    public ChargeType(String name, ChargeList.TypeOfEntityRelation entityTied) {
-        this.name = name;
-        this.entityTied = entityTied;
-    }
 }

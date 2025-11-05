@@ -37,12 +37,12 @@ public class AuthController {
     }
 
     @PostMapping("/set-password")
-    public ViazUserResponseDTO createUser(@RequestBody SetPasswordDTO request, @RequestParam String email, @RequestParam String token) throws Exception {
+    public ViazUserResponseDTO createUser(@RequestBody SetPasswordDTO request, @RequestParam String email, @RequestParam String token) {
         return authService.changePassword(email,request,token);
     }
 
-    @PostMapping("/forgot-password")
-    public void forgotPassword(@RequestBody String email) throws MessagingException {
+    @PostMapping("/forgot-password/{email}")
+    public void forgotPassword(@PathVariable String email) throws MessagingException {
         authService.forgotPassword(email);
     }
 

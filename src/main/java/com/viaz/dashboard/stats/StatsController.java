@@ -57,7 +57,7 @@ public class StatsController {
         return statsService.getMonthlyAverageRatingsForCarrier(carrierId);
     }
 
-    @GetMapping("/get-cleaned-shipments")
+    @GetMapping("/get-emptied-shipments")
     public Integer getEmptyShipments() {
         return statsService.getOpenEmptyShipments();
     }

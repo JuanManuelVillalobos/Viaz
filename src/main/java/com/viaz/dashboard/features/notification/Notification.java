@@ -12,7 +12,7 @@ import java.time.Instant;
 @ToString
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -20,6 +20,7 @@ import java.time.Instant;
 @Entity
 public class Notification {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notification_id")
@@ -42,11 +43,6 @@ public class Notification {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
-
-    public Notification(String message, ViazUser recipient) {
-        this.message = message;
-        this.recipient = recipient;
-    }
 
     public boolean getRead() {
         return read;

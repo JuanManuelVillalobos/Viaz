@@ -186,7 +186,7 @@ public class StatsService {
 
 
     public Integer getOpenEmptyShipments() {
-        return shipmentRepository.countShipmentsByOpenTrueAndCleaningOrderIs("Completada");
+        return shipmentRepository.countShipmentsByOpenTrueAndEmptyingOrderIs("Completada");
     }
 
     public Integer getNumberOfChargesLastMonth() {

@@ -1,6 +1,5 @@
 package com.viaz.dashboard.email;
 
-import com.viaz.dashboard.initializers.ShipmentIdInitializer;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.Getter;
@@ -46,6 +45,7 @@ public class EmailService {
     public void sendPasswordResetEmail(String to) throws MessagingException {
         String token = generateToken(); // Generate UUID
         String confirmationUrl = baseFrontUrl + "/auth/set-password?token=" + token + "&email=" + to;
+        logger.info("Sending password reset email to: {}", to);
         String subject = "Solicitud de restablecimiento de contraseña";
         String message = getPasswordResetMessage(to, confirmationUrl);
         sendEmail(to, subject, message, token);

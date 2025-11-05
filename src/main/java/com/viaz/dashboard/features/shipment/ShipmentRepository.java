@@ -20,14 +20,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long>, JpaSp
     Optional<Shipment> findByFullViazId(String viazId);
 
 
-    @Query("SELECT s FROM Shipment s WHERE LOWER(s.status) != LOWER('entregado') ORDER BY s.fullViazId DESC")
-    List<Shipment> getPendingShipments();
-
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM Shipment s WHERE s.fullViazId = :viazID")
-    void deleteByFullViazID(String viazID);
-
     @Query("SELECT MAX(s.sequence) FROM Shipment s")
     Integer getHighestSequence();
     
@@ -59,11 +51,9 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long>, JpaSp
 
     Integer countShipmentsByStatus(String status);
 
-    boolean existsShipmentByTransportCarrierId(Long transportCarrierId);
-
     @Query("""
-                SELECT s.typeOfService, COUNT(s) 
-                FROM Shipment s 
+                SELECT s.typeOfService, COUNT(s)
+                FROM Shipment s
                 WHERE s.createdDate >= :startDate AND s.createdDate < :endDate
                 GROUP BY s.typeOfService
             """)
@@ -71,22 +61,21 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long>, JpaSp
                                                 @Param("endDate") Instant endDate);
 
     @Query("""
-            SELECT s FROM Shipment s 
-            WHERE s.unloadDate IS NULL 
+            SELECT s FROM Shipment s
+            WHERE s.unloadDate IS NULL
               AND s.arrivalDate <= :thresholdTime
             """)
     List<Shipment> findShipmentsWithArrivalOverdueAndNoUnload(@Param("thresholdTime") LocalDateTime thresholdTime);
 
 
-    Integer countShipmentsByOpenTrueAndCleaningOrderIs(String cleaningOrder);
+    Integer countShipmentsByOpenTrueAndEmptyingOrderIs(String emptyingOrder);
 
     List<Shipment> findByBaseShipment(Shipment baseShipment);
 
     Shipment findBaseShipmentByFullViazId(String fullViazId);
 
-    List<Shipment> findAllByCleaningOrderIsIgnoreCase(String cleaningOrder);
+    List<Shipment> findAllByEmptyingOrderIsIgnoreCase(String emptyingOrder);
 
     Integer countShipmentsByOpenTrue();
 
-    boolean existsShipmentByClientClientId(Long clientClientId);
 }

@@ -11,12 +11,13 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class IncidentType {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "incident_id")
@@ -37,8 +38,4 @@ public class IncidentType {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    public IncidentType(String name, IncidentList.TypeOfEntityRelation entityTied) {
-        this.name = name;
-        this.entityTied = entityTied;
-    }
 }

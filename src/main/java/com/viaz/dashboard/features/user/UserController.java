@@ -1,6 +1,5 @@
 package com.viaz.dashboard.features.user;
 
-import com.viaz.dashboard.features.role.RoleService;
 import com.viaz.dashboard.features.user.dto.UserSummaryDTO;
 import com.viaz.dashboard.features.user.dto.ViazUserResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final RoleService roleService;
 
     @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'USER_READ')")
     @GetMapping("/get-all-users")
@@ -60,6 +58,18 @@ public class UserController {
         List<UserSummaryDTO> response = userService.getUsersByRole("Client Service");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+
+//    @PreAuthorize("@permissionEvaluatorImpl.hasPermission(authentication, 'USER_MANAGE')")
+//    @PostMapping("/{userId}/reactivate")
+//    public ResponseEntity<Map<String,Object>> reactivateUser(@PathVariable Long userId){
+//
+//        userService.reactivateUser(userId);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("message", "User reactivated successfully" + username);
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
 
 }

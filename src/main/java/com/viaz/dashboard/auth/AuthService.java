@@ -5,6 +5,7 @@ import com.viaz.dashboard.auth.dto.SetPasswordDTO;
 import com.viaz.dashboard.auth.dto.UserAuthResponseDTO;
 import com.viaz.dashboard.email.EmailService;
 import com.viaz.dashboard.features.role.Role;
+import com.viaz.dashboard.features.user.UserRepository;
 import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.initializers.lists.PermissionList;
@@ -46,14 +47,16 @@ public class AuthService {
     private final BlacklistService blacklistService;
     private final EmailService emailService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil, ViazUserDetailsService viazUserDetailsService, BlacklistService blacklistService, EmailService emailService, UserService userService) {
+    public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil, ViazUserDetailsService viazUserDetailsService, BlacklistService blacklistService, EmailService emailService, UserService userService, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.viazUserDetailsService = viazUserDetailsService;
         this.blacklistService = blacklistService;
         this.emailService = emailService;
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
 
@@ -190,10 +193,13 @@ public class AuthService {
         }
         String username = jwtUtil.extractUsername(refreshToken);
         String newAccessToken = jwtUtil.generateAccessToken(username);
+        ViazUser viazUser = userRepository.getByUsername(jwtUtil.extractUsername(refreshToken));
+        viazUser.setLastLoginDate(Instant.now());
+        userRepository.save(viazUser);
         return new Token(newAccessToken, userDetails.getUsername());
     }
 
-    public ViazUserResponseDTO changePassword(String email, SetPasswordDTO request, String token) throws Exception {
+    public ViazUserResponseDTO changePassword(String email, SetPasswordDTO request, String token) {
         // Check if the token is valid for the given email
         String storedToken = emailService.getToken(email);
         if (storedToken != null && storedToken.equals(token)) {
@@ -213,6 +219,10 @@ public class AuthService {
     }
 
     public void forgotPassword(String email) throws MessagingException {
+        boolean userExists = userService.findByEmail(email);
+        if (!userExists) {
+            throw new ResourceNotFoundException("User not found with email: " + email);
+        }
         emailService.sendPasswordResetEmail(email);
     }
 }

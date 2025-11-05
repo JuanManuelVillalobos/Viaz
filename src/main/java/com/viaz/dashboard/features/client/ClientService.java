@@ -3,9 +3,13 @@ package com.viaz.dashboard.features.client;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.features.client.dto.ClientRequestDTO;
 import com.viaz.dashboard.features.client.dto.ClientResponseDTO;
-import com.viaz.dashboard.features.shipment.ShipmentRepository;
+import com.viaz.dashboard.features.user.UserRepository;
+import com.viaz.dashboard.features.user.ViazUser;
+import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -19,7 +23,7 @@ import java.util.Set;
 public class ClientService {
 
     private final ClientRepository clientRepository;
-    private final ShipmentRepository shipmentRepository;
+    private final UserRepository userRepository;
 
     public Optional<Client> getOptionalByName(String clientName) {
         return clientRepository.getClientByName(clientName);
@@ -40,27 +44,33 @@ public class ClientService {
     }
 
     public List<ClientResponseDTO> getClients() {
-        return clientRepository.findAll().stream().map(ClientResponseDTO::new).collect(java.util.stream.Collectors.toList());
+        return clientRepository.findAll().stream().filter(client -> !client.isDeleted()).map(ClientResponseDTO::new).collect(java.util.stream.Collectors.toList());
     }
 
     public List<ClientResponseDTO> getClientsWithSensitiveFields() {
-        return clientRepository.findAll().stream().map(ClientResponseDTO::new).collect(java.util.stream.Collectors.toList());
+        return clientRepository.findAll().stream().filter(client -> !client.isDeleted()).map(ClientResponseDTO::new).collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional
     public void deleteClient(Long clientId) {
-         if (clientId == null) {
+        if (clientId == null) {
             throw new IllegalArgumentException("Client ID cannot be null");
         }
         if (!clientRepository.existsById(clientId)) {
             throw new IllegalArgumentException("Client with ID " + clientId + " does not exist");
         }
 
-        if(shipmentRepository.existsShipmentByClientClientId(clientId)){
-            throw new IllegalStateException("Cannot delete client with shipments");
-        }
+        Client client = clientRepository.getClientByClientId(clientId);
 
-        clientRepository.deleteByClientId(clientId);
+        //        Get auth
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        ViazUserDetails viazUserDetails = (ViazUserDetails) auth.getPrincipal();
+        ViazUser currentUser = userRepository.findByUsername(viazUserDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+
+
+        client.softDelete(currentUser);
+        clientRepository.save(client);
     }
 
     public ClientResponseDTO updateClient(Long clientId, Map<String, Object> updates) {
@@ -89,17 +99,12 @@ public class ClientService {
                 String stringValue = value.toString();
 
                 // Validate and set according to field
-                switch (key) {
-                    case "name":
-                        if (stringValue.trim().isEmpty()) {
-                            throw new IllegalArgumentException("Name cannot be empty");
-                        }
-                        field.set(existingClient, stringValue);
-                        break;
-
-                    default:
-                        // Should never happen because of allowedFields check
-                        break;
+                // Should never happen because of allowedFields check
+                if (key.equals("name")) {
+                    if (stringValue.trim().isEmpty()) {
+                        throw new IllegalArgumentException("Name cannot be empty");
+                    }
+                    field.set(existingClient, stringValue);
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException("Failed to update field '" + key + "': " + e.getMessage());

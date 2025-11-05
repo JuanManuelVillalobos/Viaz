@@ -29,7 +29,7 @@ import java.util.Set;
 public class ViazUser {
 
     public enum UserStatus {
-        ACTIVE, PENDING
+        ACTIVE, PENDING, LOCKED, DEACTIVATED
     }
 
     @Id
@@ -93,6 +93,16 @@ public class ViazUser {
     @Column(name = "last_modified_date")
     private Instant lastModifiedDate;
 
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "deleted_by_user_id")
+    private ViazUser deletedByUserId;
+
     public ViazUser(String username, String password, String email) {
         this.username = username;
         this.password = password;
@@ -146,5 +156,11 @@ public class ViazUser {
     @Override
     public String toString() {
         return username;
+    }
+
+    public void softDelete(ViazUser deletedByUserId) {
+        this.deleted = true;
+        this.deletedAt = Instant.now();
+        this.deletedByUserId = deletedByUserId;
     }
 }

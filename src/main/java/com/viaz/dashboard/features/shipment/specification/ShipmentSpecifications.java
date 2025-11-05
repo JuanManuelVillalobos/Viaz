@@ -93,7 +93,11 @@ public class ShipmentSpecifications {
             if (statuses == null || statuses.isEmpty()) {
                 return builder.conjunction(); // returns a no-op condition
             }
-            return root.get("status").in(statuses);
+
+            List<String> lowerStatuses = statuses.stream()
+                    .map(String::toLowerCase)
+                    .toList();
+            return builder.lower(root.get("status")).in(lowerStatuses);
         };
     }
 

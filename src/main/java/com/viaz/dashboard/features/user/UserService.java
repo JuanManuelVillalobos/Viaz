@@ -7,8 +7,11 @@ import com.viaz.dashboard.features.role.dto.RoleCreationRequestDTO;
 import com.viaz.dashboard.features.user.dto.UserSummaryDTO;
 import com.viaz.dashboard.exception.exceptions.ResourceNotFoundException;
 import com.viaz.dashboard.features.user.dto.ViazUserResponseDTO;
+import com.viaz.dashboard.features.user.userDetails.ViazUserDetails;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -150,11 +153,24 @@ public class UserService {
             throw new IllegalStateException("Cannot delete user with ADMIN role");
         }
 
-        userRepository.delete(user);
+
+        //        Get User
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        ViazUserDetails viazUserDetails = (ViazUserDetails) auth.getPrincipal();
+        ViazUser currentUser = userRepository.findByUsername(viazUserDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+
+        user.softDelete(currentUser);
+        userRepository.save(user);
     }
 
     public String getUsernameByEmailIgnoreCase(String email) {
         return userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new ResourceNotFoundException("No user with email " + email)).getUsername();
+    }
+
+    public boolean findByEmail(String email){
+        ViazUser user = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new ResourceNotFoundException("No user with email "));
+        return user != null;
     }
 
     @Transactional
